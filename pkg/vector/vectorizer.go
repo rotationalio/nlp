@@ -22,13 +22,12 @@ type Vectorizer interface {
 // CountVectorizer can be used to vectorize text using the frequency or one-hot
 // text vectorization algorithms.
 type CountVectorizer struct {
-	vocab            []string
-	lang             enum.Language
-	tokenizer        tokens.Tokenizer
-	stemmer          stemming.Stemmer
-	typeCounter      *tokens.TypeCounter
-	method           VectorizationMethod
-	excludeStopWords bool
+	vocab       []string
+	lang        enum.Language
+	tokenizer   tokens.Tokenizer
+	stemmer     stemming.Stemmer
+	typeCounter *tokens.TypeCounter
+	method      VectorizationMethod
 }
 
 // Returns a new [CountVectorizer] instance.
@@ -39,12 +38,9 @@ type CountVectorizer struct {
 //   - Stemmer: [Porter2Stemmer] using Lang above and it's own defaults
 //   - TypeCounter: [TypeCounter] using Lang, Stemmer, and Tokenizer above
 //   - Method: [VectorizeOneHot]
-//   - ExcludeStopWords: [true] (uses the stop words list for Lang above)
-//
-// TODO: vocab slice of strings
 func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectorizer *CountVectorizer, err error) {
 	// Set options
-	vectorizer = &CountVectorizer{excludeStopWords: true}
+	vectorizer = &CountVectorizer{}
 	for _, fn := range opts {
 		fn(vectorizer)
 	}
@@ -109,11 +105,6 @@ func (c *CountVectorizer) TypeCounter() *tokens.TypeCounter {
 // Returns the [CountVectorizer]s configured [VectorizationMethod].
 func (c *CountVectorizer) Method() VectorizationMethod {
 	return c.method
-}
-
-// Returns whther the [CountVectorizer] is configured to exclude stop words.
-func (c *CountVectorizer) ExcludeStopWords() bool {
-	return c.excludeStopWords
 }
 
 // Vectorizes the chunk of text.
@@ -224,13 +215,5 @@ func CountVectorizerWithTypeCounter(typecounter *tokens.TypeCounter) CountVector
 func CountVectorizerWithMethod(method VectorizationMethod) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.method = method
-	}
-}
-
-// CountVectorizerWithExcludeStopWords sets whether the [CountVectorizer] will
-// exclude stop words.
-func CountVectorizerWithExcludeStopWords(exclude bool) CountVectorizerOption {
-	return func(c *CountVectorizer) {
-		c.excludeStopWords = exclude
 	}
 }
