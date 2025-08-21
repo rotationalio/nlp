@@ -2,13 +2,13 @@
 
 Natural Language Processing in Golang.
 
-GitHub: <https://go.rtnl.ai/nlp> (<https://github.com/rotationalio/nlp>)
+GitHub: <https://github.com/rotationalio/nlp>
 
 ## The Vision
 
 `nlp` will house high-performance natural language processing and quantitative metrics, especially ones that can be computed over text.
 Think statistical or structural properties of a string or document.
-The main use case is text analysis inside [Endeavor](https://github.com/rotationalio/endeavor).
+The first use case is text analysis inside [Endeavor](https://github.com/rotationalio/endeavor).
 
 `nlp` will enable NLP for AI engineers: numeric metrics that help us reason about what a model did, what the humans expected, and how to compare the two.
 
@@ -38,13 +38,13 @@ Please see the documentation comments within the code for more information on ho
 
 ## Features, metrics, and tools
 
-* Tokenization and type counting (see [`tokens.go`](./tokens.go))
+* Tokenization and type counting
   * Regex tokenization with custom expression support
-* Stemming (see [`stemmers.go`](./stemmers.go))
-  * Porter2/Snowball stemming algorithm  (see [`porter2english.go`](./porter2english.go))
-* Similarity metrics (see [`similarity.go`](./similarity.go))
+* Stemming
+  * Porter2/Snowball stemming algorithm
+* Similarity metrics
   * Cosine similarity
-* Vectors & vectorization (see [`vectors.go`](./vectors.go))
+* Vectors & vectorization
   * One-hot encoding
   * Frequency (count) encoding
 
@@ -76,4 +76,4 @@ Research on different topics will go into the folder [`docs/research/`](./docs/r
 
 ## License
 
-See: [LICENSE](../LICENSE)
+See: [LICENSE](./LICENSE)
