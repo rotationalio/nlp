@@ -1,65 +1,18 @@
-package quant
+package vector
 
 import (
-	"math"
+	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/pkg/stemming"
+	"go.rtnl.ai/nlp/pkg/tokens"
 )
-
-// ############################################################################
-// Vector Math Functions
-// ############################################################################
-
-// Cosine returns the cosine of the angle between two vectors; which can be used
-// as a similarity metric (as defined by SLP 3rd Edition section 6.4 fig 6.10).
-// If the vectors do not have the same number of elements, an error will be
-// returned.
-func Cosine(a, b []float64) (cosine float64, err error) {
-	// Ensure vectors have the same number of elements
-	if len(a) != len(b) {
-		return 0.0, ErrUnequalLengthVectors
-	}
-
-	var (
-		dp, vla, vlb float64
-	)
-	if dp, err = DotProduct(a, b); err != nil {
-		return 0.0, err
-	}
-	vla = VectorLength(a)
-	vlb = VectorLength(b)
-	return dp / (vla * vlb), nil
-}
-
-// DotProduct returns the dot product of the two vectors (as defined by SLP 3rd
-// Edition section 6.4 fig 6.7). If the vectors do not have the same number
-// of elements, an error will be returned.
-func DotProduct(a, b []float64) (product float64, err error) {
-	// Ensure vectors have the same number of elements
-	if len(a) != len(b) {
-		return 0.0, ErrUnequalLengthVectors
-	}
-
-	for i := range a {
-		product += a[i] * b[i]
-	}
-	return product, nil
-}
-
-// VectorLength returns the vector length (as defined by SLP 3rd Edition section
-// 6.4 fig 6.8).
-func VectorLength(v []float64) (length float64) {
-	for _, e := range v {
-		length += e * e
-	}
-	return math.Sqrt(length)
-}
 
 // ############################################################################
 // Vectorizer interface
 // ############################################################################
 
 type Vectorizer interface {
-	// TODO type for the Vector (float64 for now)
-	Vectorize(chunk string) (vector []float64, err error)
+	Vectorize(chunk string) (vector Vector, err error)
 }
 
 // ############################################################################
@@ -69,11 +22,11 @@ type Vectorizer interface {
 // CountVectorizer can be used to vectorize text using the frequency or one-hot
 // text vectorization algorithms.
 type CountVectorizer struct {
-	vocab            map[string]int
-	lang             Language
-	tokenizer        Tokenizer
-	stemmer          Stemmer
-	typeCounter      *TypeCounter
+	vocab            []string
+	lang             enum.Language
+	tokenizer        tokens.Tokenizer
+	stemmer          stemming.Stemmer
+	typeCounter      *tokens.TypeCounter
 	method           VectorizationMethod
 	excludeStopWords bool
 }
@@ -89,7 +42,7 @@ type CountVectorizer struct {
 //   - ExcludeStopWords: [true] (uses the stop words list for Lang above)
 //
 // TODO: vocab slice of strings
-func NewCountVectorizer(vocab map[string]int, opts ...CountVectorizerOption) (vectorizer *CountVectorizer, err error) {
+func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectorizer *CountVectorizer, err error) {
 	// Set options
 	vectorizer = &CountVectorizer{excludeStopWords: true}
 	for _, fn := range opts {
@@ -100,23 +53,23 @@ func NewCountVectorizer(vocab map[string]int, opts ...CountVectorizerOption) (ve
 	vectorizer.vocab = vocab
 
 	// Set defaults
-	if vectorizer.lang == LanguageUnknown {
-		vectorizer.lang = LanuageEnglish
+	if vectorizer.lang == enum.LanguageUnknown {
+		vectorizer.lang = enum.LanguageEnglish
 	}
 	if vectorizer.tokenizer == nil {
 		// create with default regex
-		vectorizer.tokenizer = NewRegexTokenizer(RegexTokenizerWithLanguage(vectorizer.lang))
+		vectorizer.tokenizer = tokens.NewRegexTokenizer(tokens.RegexTokenizerWithLanguage(vectorizer.lang))
 	}
 	if vectorizer.stemmer == nil {
-		if vectorizer.stemmer, err = NewPorter2Stemmer(vectorizer.lang); err != nil {
+		if vectorizer.stemmer, err = stemming.NewPorter2Stemmer(vectorizer.lang); err != nil {
 			return nil, err
 		}
 	}
-	if !vectorizer.typeCounter.initialized {
-		if vectorizer.typeCounter, err = NewTypeCounter(
-			TypeCounterWithLanguage(vectorizer.lang),
-			TypeCounterWithTokenizer(vectorizer.tokenizer),
-			TypeCounterWithStemmer(vectorizer.stemmer),
+	if !vectorizer.typeCounter.Initialized() {
+		if vectorizer.typeCounter, err = tokens.NewTypeCounter(
+			tokens.TypeCounterWithLanguage(vectorizer.lang),
+			tokens.TypeCounterWithTokenizer(vectorizer.tokenizer),
+			tokens.TypeCounterWithStemmer(vectorizer.stemmer),
 		); err != nil {
 			return nil, err
 		}
@@ -129,27 +82,27 @@ func NewCountVectorizer(vocab map[string]int, opts ...CountVectorizerOption) (ve
 }
 
 // Returns the [CountVectorizer]s configured vocabulary.
-func (c *CountVectorizer) Vocab() map[string]int {
+func (c *CountVectorizer) Vocab() []string {
 	return c.vocab
 }
 
-// Returns the [CountVectorizer]s configured [Language].
-func (c *CountVectorizer) Language() Language {
+// Returns the [CountVectorizer]s configured [enum.Language].
+func (c *CountVectorizer) Language() enum.Language {
 	return c.lang
 }
 
-// Returns the [CountVectorizer]s configured [Tokenizer].
-func (c *CountVectorizer) Tokenizer() Tokenizer {
+// Returns the [CountVectorizer]s configured [tokens.Tokenizer].
+func (c *CountVectorizer) Tokenizer() tokens.Tokenizer {
 	return c.tokenizer
 }
 
-// Returns the [CountVectorizer]s configured [Stemmer].
-func (c *CountVectorizer) Stemmer() Stemmer {
+// Returns the [CountVectorizer]s configured [stemming.Stemmer].
+func (c *CountVectorizer) Stemmer() stemming.Stemmer {
 	return c.stemmer
 }
 
-// Returns the [CountVectorizer]s configured [TypeCounter].
-func (c *CountVectorizer) TypeCounter() *TypeCounter {
+// Returns the [CountVectorizer]s configured [tokens.TypeCounter].
+func (c *CountVectorizer) TypeCounter() *tokens.TypeCounter {
 	return c.typeCounter
 }
 
@@ -164,20 +117,20 @@ func (c *CountVectorizer) ExcludeStopWords() bool {
 }
 
 // Vectorizes the chunk of text.
-func (v *CountVectorizer) Vectorize(chunk string) (vector []float64, err error) {
+func (v *CountVectorizer) Vectorize(chunk string) (vector Vector, err error) {
 	switch v.method {
 	case VectorizeOneHot:
 		return v.VectorizeOneHot(chunk)
 	case VectorizeFrequency:
 		return v.VectorizeFrequency(chunk)
 	}
-	return nil, ErrMethodNotSupported
+	return nil, errors.ErrMethodNotSupported
 }
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the given
 // chunk of text and given vocabulary map. The vector returned has a value of
 // the count of word instances within the chunk for each vocabulary word index.
-func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector []float64, err error) {
+func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector Vector, err error) {
 	// Type count the chunk
 	var types map[string]int
 	if types, err = v.typeCounter.TypeCount(chunk); err != nil {
@@ -185,8 +138,8 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector []float64, er
 	}
 
 	// Create the vector from the vocabulary
-	vector = make([]float64, len(v.vocab))
-	for word, i := range v.vocab {
+	vector = make(Vector, len(v.vocab))
+	for i, word := range v.vocab {
 		if count, ok := types[word]; ok {
 			vector[i] = float64(count)
 		}
@@ -199,7 +152,7 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector []float64, er
 // and given vocabulary map. The vector returned has a value of 1 for each
 // vocabulary word index if it is present within the chunk of text and 0
 // otherwise.
-func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector []float64, err error) {
+func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector Vector, err error) {
 	// Get the frequency encoding
 	if vector, err = v.VectorizeFrequency(chunk); err != nil {
 		return nil, err
@@ -234,33 +187,33 @@ const (
 // TypeCounterOption functions modify a [CountVectorizer].
 type CountVectorizerOption func(c *CountVectorizer)
 
-// CountVectorizerWithLang sets the [Language] to use with the
+// CountVectorizerWithLang sets the [enum.Language] to use with the
 // [CountVectorizer].
-func CountVectorizerWithLang(lang Language) CountVectorizerOption {
+func CountVectorizerWithLang(lang enum.Language) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.lang = lang
 	}
 }
 
-// CountVectorizerWithTokenizer sets the [Tokenizer] to use with the
+// CountVectorizerWithTokenizer sets the [tokens.Tokenizer] to use with the
 // [CountVectorizer].
-func CountVectorizerWithTokenizer(tokenizer Tokenizer) CountVectorizerOption {
+func CountVectorizerWithTokenizer(tokenizer tokens.Tokenizer) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.tokenizer = tokenizer
 	}
 }
 
-// CountVectorizerWithStemmer sets the [Stemmer] to use with the
+// CountVectorizerWithStemmer sets the [stemming.Stemmer] to use with the
 // [CountVectorizer].
-func CountVectorizerWithStemmer(stemmer Stemmer) CountVectorizerOption {
+func CountVectorizerWithStemmer(stemmer stemming.Stemmer) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.stemmer = stemmer
 	}
 }
 
-// CountVectorizerWithTypeCounter sets the [TypeCounter] to use with the
+// CountVectorizerWithTypeCounter sets the [tokens.TypeCounter] to use with the
 // [CountVectorizer].
-func CountVectorizerWithTypeCounter(typecounter *TypeCounter) CountVectorizerOption {
+func CountVectorizerWithTypeCounter(typecounter *tokens.TypeCounter) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.typeCounter = typecounter
 	}

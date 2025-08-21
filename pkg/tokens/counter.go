@@ -1,4 +1,9 @@
-package quant
+package tokens
+
+import (
+	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/stemming"
+)
 
 // ############################################################################
 // TypeCounter
@@ -6,16 +11,16 @@ package quant
 
 // TypeCounter can be used to perform type counting on text; create with [NewTypeCounter].
 type TypeCounter struct {
-	lang      Language
+	lang      enum.Language
 	tokenizer Tokenizer
-	stemmer   Stemmer
+	stemmer   stemming.Stemmer
 
 	// Whether this struct was initialized by [NewTypeCounter]
 	initialized bool
 }
 
 // Returns a new [TypeCounter] instance. Defaults to the default [RegexTokenizer] and
-// [Stemmer] options. Modified by passing [TypeCounterOption] functions into
+// [stemming.Stemmer] options. Modified by passing [TypeCounterOption] functions into
 // relevant function calls.
 //
 // Defaults:
@@ -30,14 +35,14 @@ func NewTypeCounter(opts ...TypeCounterOption) (tc *TypeCounter, err error) {
 	}
 
 	// Set defaults
-	if tc.lang == LanguageUnknown {
-		tc.lang = LanuageEnglish
+	if tc.lang == enum.LanguageUnknown {
+		tc.lang = enum.LanguageEnglish
 	}
 	if tc.tokenizer == nil {
 		tc.tokenizer = NewRegexTokenizer()
 	}
 	if tc.stemmer == nil {
-		if tc.stemmer, err = NewPorter2Stemmer(tc.lang); err != nil {
+		if tc.stemmer, err = stemming.NewPorter2Stemmer(tc.lang); err != nil {
 			return nil, err
 		}
 	}
@@ -47,8 +52,8 @@ func NewTypeCounter(opts ...TypeCounterOption) (tc *TypeCounter, err error) {
 	return tc, nil
 }
 
-// Returns the [TypeCounter]s configured [Language].
-func (c *TypeCounter) Languge() Language {
+// Returns the [TypeCounter]s configured [enum.Language].
+func (c *TypeCounter) Languge() enum.Language {
 	return c.lang
 }
 
@@ -57,8 +62,8 @@ func (c *TypeCounter) Tokenizer() Tokenizer {
 	return c.tokenizer
 }
 
-// Returns the [TypeCounter]s configured [Stemmer].
-func (c *TypeCounter) Stemmer() Stemmer {
+// Returns the [TypeCounter]s configured [stemming.Stemmer].
+func (c *TypeCounter) Stemmer() stemming.Stemmer {
 	return c.stemmer
 }
 
@@ -70,7 +75,7 @@ func (c *TypeCounter) Initialized() bool {
 // Returns a map of type strings and their counts. For each token, all of the
 // modifiers provided will be performed before counting. An example of a
 // [StringModifier] would be the function [strings.ToLower] or many others in
-// the Go [strings] package. Defaults to the default [Tokenizer] and [Stemmer]
+// the Go [strings] package. Defaults to the default [Tokenizer] and [stemming.Stemmer]
 // default options if none are provided.
 func (c *TypeCounter) TypeCount(chunk string) (types map[string]int, err error) {
 	// Tokenize
@@ -106,8 +111,8 @@ func (c *TypeCounter) CountTypes(tokens []string) (types map[string]int) {
 // TypeCounterOption functions modify a [TypeCounter].
 type TypeCounterOption func(t *TypeCounter)
 
-// TypeCounterWithLanguage sets the [Language] to be used for a [TypeCounter].
-func TypeCounterWithLanguage(lang Language) TypeCounterOption {
+// TypeCounterWithLanguage sets the [enum.Language] to be used for a [TypeCounter].
+func TypeCounterWithLanguage(lang enum.Language) TypeCounterOption {
 	return func(t *TypeCounter) {
 		t.lang = lang
 	}
@@ -120,8 +125,8 @@ func TypeCounterWithTokenizer(tokenizer Tokenizer) TypeCounterOption {
 	}
 }
 
-// TypeCounterWithStemmer sets the [Stemmer] to be used for a [TypeCounter].
-func TypeCounterWithStemmer(stemmer Stemmer) TypeCounterOption {
+// TypeCounterWithStemmer sets the [stemming.Stemmer] to be used for a [TypeCounter].
+func TypeCounterWithStemmer(stemmer stemming.Stemmer) TypeCounterOption {
 	return func(t *TypeCounter) {
 		t.stemmer = stemmer
 	}

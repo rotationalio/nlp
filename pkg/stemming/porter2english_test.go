@@ -1,23 +1,24 @@
-package quant_test
+package stemming_test
 
 import (
 	"fmt"
 	"testing"
 
-	"go.rtnl.ai/x/assert"
-	"go.rtnl.ai/x/quant"
+	"github.com/stretchr/testify/require"
+	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/stemming"
 )
 
-// Stemming words tests implemented in [TestStemmers] in 'stemmers_test.go'
+// NOTE: Full stemming tests implemented in [TestStemmers] in 'stemmers_test.go'
 
 // Ensure that if the user bypasses setting the [quant.Language] in the
 // [quant.Porter2Stemmer] that [quant.Porter2Stemmer.StemEnglish] still works.
 func TestPorter2EnglishBypass(t *testing.T) {
-	stemmer := &quant.Porter2Stemmer{} // no 'lang' set
+	stemmer := &stemming.Porter2Stemmer{} // no 'lang' set
 	in := "seaweed"
 	exp := "seawe"
 	act := stemmer.StemEnglish(in)
-	assert.Equal(t, exp, act, fmt.Sprintf("wrong stem for |%s|: expected |%s|, got |%s|", in, exp, act))
+	require.Equal(t, exp, act, fmt.Sprintf("wrong stem for |%s|: expected |%s|, got |%s|", in, exp, act))
 }
 
 // Use the following test to test a single word stem, for debugging.
@@ -28,6 +29,6 @@ func TestPorter2Single(t *testing.T) {
 	// Debug a single, specific word
 	in := "seaweed"
 	exp := "seawe"
-	act := mustNewPorter2Stemmer(quant.LanuageEnglish).Stem(in)
-	assert.Equal(t, exp, act, fmt.Sprintf("wrong stem for |%s|: expected |%s|, got |%s|", in, exp, act))
+	act := mustNewPorter2Stemmer(enum.LanguageEnglish).Stem(in)
+	require.Equal(t, exp, act, fmt.Sprintf("wrong stem for |%s|: expected |%s|, got |%s|", in, exp, act))
 }

@@ -1,4 +1,10 @@
-package quant
+package similarity
+
+import (
+	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/tokens"
+	"go.rtnl.ai/nlp/pkg/vector"
+)
 
 // ############################################################################
 // Similarizer interface
@@ -15,10 +21,10 @@ type Similarizer interface {
 // CosineSimilarizer can be used to calculate the cosine similarity of two text
 // chunks.
 type CosineSimilarizer struct {
-	vocab      map[string]int
-	lang       Language
-	tokenizer  Tokenizer
-	vectorizer Vectorizer
+	vocab      []string
+	lang       enum.Language
+	tokenizer  tokens.Tokenizer
+	vectorizer vector.Vectorizer
 }
 
 // Returns a new [CosineSimilarizer] with the vocabulary and options set.
@@ -28,7 +34,7 @@ type CosineSimilarizer struct {
 //   - Tokenizer: [RegexTokenizer] with the Lang above and it's own defaults
 //   - Vectorizer: [CountVectorizer] with the given vocabulary, Lang above, and
 //     it's own defaults
-func NewCosineSimilarizer(vocab map[string]int, opts ...CosineSimilarizerOption) (similarizer *CosineSimilarizer, err error) {
+func NewCosineSimilarizer(vocab []string, opts ...CosineSimilarizerOption) (similarizer *CosineSimilarizer, err error) {
 	// Set options
 	similarizer = &CosineSimilarizer{}
 	for _, fn := range opts {
@@ -39,14 +45,14 @@ func NewCosineSimilarizer(vocab map[string]int, opts ...CosineSimilarizerOption)
 	similarizer.vocab = vocab
 
 	//Set defaults
-	if similarizer.lang == LanguageUnknown {
-		similarizer.lang = LanuageEnglish
+	if similarizer.lang == enum.LanguageUnknown {
+		similarizer.lang = enum.LanguageEnglish
 	}
 	if similarizer.tokenizer == nil {
-		similarizer.tokenizer = NewRegexTokenizer(RegexTokenizerWithLanguage(similarizer.lang))
+		similarizer.tokenizer = tokens.NewRegexTokenizer(tokens.RegexTokenizerWithLanguage(similarizer.lang))
 	}
 	if similarizer.vectorizer == nil {
-		if similarizer.vectorizer, err = NewCountVectorizer(similarizer.vocab, CountVectorizerWithLang(similarizer.lang)); err != nil {
+		if similarizer.vectorizer, err = vector.NewCountVectorizer(similarizer.vocab, vector.CountVectorizerWithLang(similarizer.lang)); err != nil {
 			return nil, err
 		}
 	}
@@ -54,11 +60,31 @@ func NewCosineSimilarizer(vocab map[string]int, opts ...CosineSimilarizerOption)
 	return nil, nil
 }
 
+// Returns the [CosineSimilarizer]s configured vocabulary.
+func (c *CosineSimilarizer) Vocab() []string {
+	return c.vocab
+}
+
+// Returns the [CosineSimilarizer]s configured [enum.Language].
+func (c *CosineSimilarizer) Language() enum.Language {
+	return c.lang
+}
+
+// Returns the [CosineSimilarizer]s configured [tokens.Tokenizer].
+func (c *CosineSimilarizer) Tokenizer() tokens.Tokenizer {
+	return c.tokenizer
+}
+
+// Returns the [CosineSimilarizer]s configured [vector.Vectorizer].
+func (c *CosineSimilarizer) Vectorizer() vector.Vectorizer {
+	return c.vectorizer
+}
+
 // Similarity returns a value in the range [-1.0, 1.0] that indicates if two
 // strings are similar using the cosine similarity method.
 func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err error) {
 	//Vectorize the strings
-	var vecA, vecB []float64
+	var vecA, vecB vector.Vector
 	if vecA, err = s.vectorizer.Vectorize(a); err != nil {
 		return 0.0, err
 	}
@@ -67,7 +93,7 @@ func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err err
 	}
 
 	// Calculate the cosine of the angle between the vectors as the similarity
-	if similarity, err = Cosine(vecA, vecB); err != nil {
+	if similarity, err = vector.Cosine(vecA, vecB); err != nil {
 		return 0.0, err
 	}
 
@@ -81,22 +107,22 @@ func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err err
 // A CosineSimilarizerOption function sets options for a [CosineSimilarizer].
 type CosineSimilarizerOption func(s *CosineSimilarizer)
 
-// Returns a function which sets a [CosineSimilarizer]s [Language].
-func CosineSimilarizerWithLanguage(lang Language) CosineSimilarizerOption {
+// Returns a function which sets a [CosineSimilarizer]s [enum.Language].
+func CosineSimilarizerWithLanguage(lang enum.Language) CosineSimilarizerOption {
 	return func(s *CosineSimilarizer) {
 		s.lang = lang
 	}
 }
 
-// Returns a function which sets a [CosineSimilarizer]s [Tokenizer].
-func CosineSimilarizerWithTokenizer(tokenizer Tokenizer) CosineSimilarizerOption {
+// Returns a function which sets a [CosineSimilarizer]s [tokens.Tokenizer].
+func CosineSimilarizerWithTokenizer(tokenizer tokens.Tokenizer) CosineSimilarizerOption {
 	return func(s *CosineSimilarizer) {
 		s.tokenizer = tokenizer
 	}
 }
 
-// Returns a function which sets a [CosineSimilarizer]s [Vectorizer].
-func CosineSimilarizerWithVectorizer(vectorizer Vectorizer) CosineSimilarizerOption {
+// Returns a function which sets a [CosineSimilarizer]s [vector.Vectorizer].
+func CosineSimilarizerWithVectorizer(vectorizer vector.Vectorizer) CosineSimilarizerOption {
 	return func(s *CosineSimilarizer) {
 		s.vectorizer = vectorizer
 	}

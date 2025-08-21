@@ -1,8 +1,11 @@
-package quant
+package stemming
 
 import (
 	"slices"
 	"strings"
+
+	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/shared"
 )
 
 // ############################################################################
@@ -15,10 +18,10 @@ import (
 func (p *Porter2Stemmer) StemEnglish(word string) (stem string) {
 	// Ensure the language configured is English, in case the user did not call
 	// [Porter2Stemmer.Stem] to get here.
-	if p.lang != LanuageEnglish {
+	if p.lang != enum.LanguageEnglish {
 		// Not English, so set it to English for now and reset it when done
 		oldLang := p.lang
-		p.lang = LanuageEnglish
+		p.lang = enum.LanguageEnglish
 		defer func() { p.lang = oldLang }()
 	}
 
@@ -78,7 +81,7 @@ func (p *Porter2Stemmer) StemEnglish(word string) (stem string) {
 // null string indicates it is not exceptional.
 func (p *Porter2Stemmer) porter2Exceptions(word string) string {
 	switch p.lang {
-	case LanuageEnglish:
+	case enum.LanguageEnglish:
 		switch word {
 		// Porter2 exceptions:
 		case "skis":
@@ -540,7 +543,7 @@ func (p *Porter2Stemmer) longestMatchingSuffix(start, end int, suffixes ...strin
 	}
 
 	// Sort the suffixes by length and lexicographically
-	SortLengthAndLexicographically(suffixes)
+	shared.SortByLengthAndLexicographically(suffixes)
 
 	// Find the first matching suffix
 	for _, suffix := range suffixes {
@@ -580,7 +583,7 @@ func (p *Porter2Stemmer) appendSuffix(suffix string) {
 // the Porter2 algorithm.
 func (p *Porter2Stemmer) isVowel(i int) bool {
 	switch p.lang {
-	case LanuageEnglish:
+	case enum.LanguageEnglish:
 		switch p.word[i] {
 		// We will only count lower case vowels because capital Y indicates
 		// that particular Y is defined as a non-vowel.
@@ -595,7 +598,7 @@ func (p *Porter2Stemmer) isVowel(i int) bool {
 // defined in the Porter2 algorithm.
 func (p *Porter2Stemmer) isDouble(i int) bool {
 	switch p.lang {
-	case LanuageEnglish:
+	case enum.LanguageEnglish:
 		switch p.word[i] {
 		case 'b', 'd', 'f', 'g', 'm', 'n', 'p', 'r', 't':
 			// It's a double if i and i+1 are both the same and one of above
@@ -611,7 +614,7 @@ func (p *Porter2Stemmer) isDouble(i int) bool {
 // as defined in the Porter2 algorithm.
 func (p *Porter2Stemmer) isValidLiEnding(i int) bool {
 	switch p.lang {
-	case LanuageEnglish:
+	case enum.LanguageEnglish:
 		switch p.word[i] {
 		case 'c', 'd', 'e', 'g', 'h', 'k', 'm', 'n', 'r', 't':
 			// It's a valid li- ending if it's one of the runes above
@@ -624,7 +627,7 @@ func (p *Porter2Stemmer) isValidLiEnding(i int) bool {
 // Returns true if the word buffer slice [:i] ends in a short syllable.
 func (p *Porter2Stemmer) endsShortSyllable(i int) bool {
 	switch p.lang {
-	case LanuageEnglish:
+	case enum.LanguageEnglish:
 		// Not enough runes to be a short syllable
 		if i < 2 {
 			return false
@@ -652,7 +655,7 @@ func (p *Porter2Stemmer) endsShortSyllable(i int) bool {
 // Returns true if the word is a short word as defined in the Porter2 algorithm.
 func (p *Porter2Stemmer) isShortWord() bool {
 	switch p.lang {
-	case LanuageEnglish:
+	case enum.LanguageEnglish:
 		// If R1 is not the "null" region at the end of the word, it is not a
 		// short word
 		if p.p1 != len(p.word) {
