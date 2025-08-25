@@ -16,15 +16,18 @@ func Cosine(a, b Vector) (cosine float64, err error) {
 		return 0.0, errors.ErrUnequalLengthVectors
 	}
 
-	var (
-		dp, vla, vlb float64
-	)
-	if dp, err = DotProduct(a, b); err != nil {
+	// Calculate the dot product and the product of the two vector's lengths
+	var dotprod, vlenprod float64
+	if dotprod, err = DotProduct(a, b); err != nil {
 		return 0.0, err
 	}
-	vla = VectorLength(a)
-	vlb = VectorLength(b)
-	return dp / (vla * vlb), nil
+	vlenprod = VectorLength(a) * VectorLength(b)
+
+	if vlenprod == 0.0 {
+		// Cosine is undefined for zero length vectors
+		return 0.0, errors.ErrUndefinedValue
+	}
+	return dotprod / vlenprod, nil
 }
 
 // DotProduct returns the dot product of the two vectors (as defined by SLP 3rd
