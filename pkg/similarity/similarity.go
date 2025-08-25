@@ -57,7 +57,7 @@ func NewCosineSimilarizer(vocab []string, opts ...CosineSimilarizerOption) (simi
 		}
 	}
 
-	return nil, nil
+	return similarizer, nil
 }
 
 // Returns the [CosineSimilarizer]s configured vocabulary.
