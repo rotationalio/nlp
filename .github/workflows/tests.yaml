@@ -60,8 +60,6 @@ jobs:
         run: |
           go version
 
-      - name: Code Generation
-        run: go generate ./...
 
       - name: Run Unit Tests
         run: go test -v -coverprofile=coverage.txt -covermode=atomic --race ./...
