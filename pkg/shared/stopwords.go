@@ -16,7 +16,7 @@ import (
 func IsStopWord(word string, lang enum.Language) bool {
 	switch lang {
 	case enum.LanguageEnglish:
-		return slices.Contains(StopWordsEnglish[:], strings.ToLower(word))
+		return slices.Contains(StopWordsEnglish[:], strings.TrimSpace(strings.ToLower(word)))
 	}
 	return false
 }
