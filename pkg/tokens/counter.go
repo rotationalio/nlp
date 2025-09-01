@@ -14,9 +14,6 @@ type TypeCounter struct {
 	lang      enum.Language
 	tokenizer Tokenizer
 	stemmer   stemming.Stemmer
-
-	// Whether this struct was initialized by [NewTypeCounter]
-	initialized bool
 }
 
 // Returns a new [TypeCounter] instance. Defaults to the default [RegexTokenizer] and
@@ -38,16 +35,16 @@ func NewTypeCounter(opts ...TypeCounterOption) (tc *TypeCounter, err error) {
 	if tc.lang == enum.LanguageUnknown {
 		tc.lang = enum.LanguageEnglish
 	}
+
 	if tc.tokenizer == nil {
 		tc.tokenizer = NewRegexTokenizer()
 	}
+
 	if tc.stemmer == nil {
 		if tc.stemmer, err = stemming.NewPorter2Stemmer(tc.lang); err != nil {
 			return nil, err
 		}
 	}
-
-	tc.initialized = true
 
 	return tc, nil
 }
@@ -65,11 +62,6 @@ func (c *TypeCounter) Tokenizer() Tokenizer {
 // Returns the [TypeCounter]s configured [stemming.Stemmer].
 func (c *TypeCounter) Stemmer() stemming.Stemmer {
 	return c.stemmer
-}
-
-// Returns true if the [TypeCounter] was initialized by [NewTypeCounter].
-func (c *TypeCounter) Initialized() bool {
-	return c.initialized
 }
 
 // Returns a map of the types (unique word stems) and their counts for the given

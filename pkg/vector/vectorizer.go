@@ -64,7 +64,7 @@ func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectoriz
 		}
 	}
 
-	if vectorizer.typeCounter == nil || !vectorizer.typeCounter.Initialized() {
+	if vectorizer.typeCounter == nil {
 		if vectorizer.typeCounter, err = tokens.NewTypeCounter(
 			tokens.TypeCounterWithLanguage(vectorizer.lang),
 			tokens.TypeCounterWithTokenizer(vectorizer.tokenizer),
