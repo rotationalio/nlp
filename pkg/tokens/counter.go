@@ -72,15 +72,12 @@ func (c *TypeCounter) Initialized() bool {
 	return c.initialized
 }
 
-// Returns a map of type strings and their counts. For each token, all of the
-// modifiers provided will be performed before counting. An example of a
-// [StringModifier] would be the function [strings.ToLower] or many others in
-// the Go [strings] package. Defaults to the default [Tokenizer] and [stemming.Stemmer]
-// default options if none are provided.
-func (c *TypeCounter) TypeCount(chunk string) (types map[string]int, err error) {
+// Returns a map of the types (unique word stems) and their counts for the given
+// text string.
+func (c *TypeCounter) TypeCount(text string) (types map[string]int, err error) {
 	// Tokenize
 	var tokens []string
-	if tokens, err = c.tokenizer.Tokenize(chunk); err != nil {
+	if tokens, err = c.tokenizer.Tokenize(text); err != nil {
 		return nil, err
 	}
 
