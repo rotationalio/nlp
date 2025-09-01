@@ -61,57 +61,61 @@ func TestNewCosineSimilarizer(t *testing.T) {
 }
 
 func TestCosineSimilarity(t *testing.T) {
-	t.Run("SuccessExactMatch", func(t *testing.T) {
-		// setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-		similarizer, err := similarity.NewCosineSimilarizer(vocab)
-		require.NoError(t, err)
-		require.NotNil(t, similarizer)
+	testcases := []struct {
+		Name     string
+		First    string
+		Second   string
+		Expected float64
+		Error    error
+	}{
+		{
+			Name:     "ExactMatch",
+			First:    "apple bananna cat",
+			Second:   "apple bananna cat",
+			Expected: 1.0,
+			Error:    nil,
+		},
+		{
+			Name:     "ZeroMatch",
+			First:    "xylophone youngster zebra",
+			Second:   "apple bananna cat",
+			Expected: 0.0,
+			Error:    nil,
+		},
+		{
+			Name:     "TwoThirdsMatch",
+			First:    "apple youngster zebra",
+			Second:   "apple bananna zebra",
+			Expected: (2.0 / 3.0),
+			Error:    nil,
+		},
+		{
+			Name:     "ErrorNotDefined",
+			First:    "returns error undefined value",
+			Second:   "returns error undefined value",
+			Expected: 0.0,
+			Error:    errors.ErrUndefinedValue,
+		},
+	}
 
-		// test
-		sim, err := similarizer.Similarity("apple bananna cat", "apple bananna cat")
-		require.NoError(t, err)
-		require.Equal(t, 1.0, sim)
-	})
+	// setup
+	vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
+	similarizer, err := similarity.NewCosineSimilarizer(vocab)
+	require.NoError(t, err)
+	require.NotNil(t, similarizer)
 
-	t.Run("SuccessZeroSimilarity", func(t *testing.T) {
-		// setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-		similarizer, err := similarity.NewCosineSimilarizer(vocab)
-		require.NoError(t, err)
-		require.NotNil(t, similarizer)
-
-		// test
-		sim, err := similarizer.Similarity("xylophone youngster zebra", "apple bananna cat")
-		require.NoError(t, err)
-		require.Equal(t, 0.0, sim)
-	})
-
-	t.Run("SuccessPartialMatch", func(t *testing.T) {
-		// setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-		similarizer, err := similarity.NewCosineSimilarizer(vocab)
-		require.NoError(t, err)
-		require.NotNil(t, similarizer)
-
-		// test
-		sim, err := similarizer.Similarity("apple youngster zebra", "apple bananna zebra")
-		require.NoError(t, err)
-		require.True(t, almostEqual(sim, (2.0/3.0), 1e-12))
-	})
-
-	t.Run("ErrorNotDefined", func(t *testing.T) {
-		// setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-		similarizer, err := similarity.NewCosineSimilarizer(vocab)
-		require.NoError(t, err)
-		require.NotNil(t, similarizer)
-
-		// test
-		sim, err := similarizer.Similarity("returns error undefined value", "returns error undefined value")
-		require.Error(t, err, errors.ErrUndefinedValue)
-		require.Equal(t, 0.0, sim)
-	})
+	// tests
+	for _, tc := range testcases {
+		t.Run(tc.Name, func(t *testing.T) {
+			sim, err := similarizer.Similarity(tc.First, tc.Second)
+			if tc.Error != nil {
+				require.Error(t, err, tc.Error)
+			} else {
+				require.NoError(t, err)
+			}
+			require.True(t, almostEqual(tc.Expected, sim, 1e-12))
+		})
+	}
 }
 
 // ############################################################################
