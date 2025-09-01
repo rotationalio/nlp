@@ -16,7 +16,7 @@ func TestNewTypeCounter(t *testing.T) {
 		require.NotNil(t, tc)
 	})
 
-	t.Run("SuccessLanguageOption", func(t *testing.T) {
+	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
 		lang := enum.LanguageEnglish
 		langOpt := tokens.TypeCounterWithLanguage(lang)
@@ -28,7 +28,7 @@ func TestNewTypeCounter(t *testing.T) {
 		require.Equal(t, enum.LanguageEnglish, tc.Languge())
 	})
 
-	t.Run("SuccessTokenizerOption", func(t *testing.T) {
+	t.Run("SuccessTokenizerOption_RegexTokenizer", func(t *testing.T) {
 		//setup
 		tok := tokens.NewRegexTokenizer()
 		tokOpt := tokens.TypeCounterWithTokenizer(tok)
@@ -40,7 +40,7 @@ func TestNewTypeCounter(t *testing.T) {
 		require.Equal(t, tok, tc.Tokenizer())
 	})
 
-	t.Run("SuccessStemmerOption", func(t *testing.T) {
+	t.Run("SuccessStemmerOption_Porter2Stemmer", func(t *testing.T) {
 		//setup
 		lang := enum.LanguageEnglish
 		stemmer, err := stemming.NewPorter2Stemmer(lang)

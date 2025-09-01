@@ -19,7 +19,7 @@ func TestNewCosineSimilarizer(t *testing.T) {
 		require.NotNil(t, sim)
 	})
 
-	t.Run("SuccessLanguageOption", func(t *testing.T) {
+	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		// setup
 		lang := enum.LanguageEnglish
 		optLang := similarity.CosineSimilarizerWithLanguage(lang)
@@ -32,7 +32,7 @@ func TestNewCosineSimilarizer(t *testing.T) {
 		require.Equal(t, lang, sim.Language())
 	})
 
-	t.Run("SuccessTokenizerOption", func(t *testing.T) {
+	t.Run("SuccessTokenizerOption_RegexTokenizer", func(t *testing.T) {
 		// setup
 		tok := tokens.NewRegexTokenizer()
 		optTok := similarity.CosineSimilarizerWithTokenizer(tok)
@@ -45,7 +45,7 @@ func TestNewCosineSimilarizer(t *testing.T) {
 		require.Equal(t, tok, sim.Tokenizer())
 	})
 
-	t.Run("SuccessVectorizerOption", func(t *testing.T) {
+	t.Run("SuccessVectorizerOption_CountVectorizer", func(t *testing.T) {
 		// setup
 		vocab := []string{"this", "is", "a", "test"}
 		vec, err := vector.NewCountVectorizer(vocab)
@@ -69,28 +69,28 @@ func TestCosineSimilarity(t *testing.T) {
 		Error    error
 	}{
 		{
-			Name:     "ExactMatch",
+			Name:     "SuccessExactMatch",
 			First:    "apple bananna cat",
 			Second:   "apple bananna cat",
 			Expected: 1.0,
 			Error:    nil,
 		},
 		{
-			Name:     "ZeroMatch",
+			Name:     "SuccessZeroMatch",
 			First:    "xylophone youngster zebra",
 			Second:   "apple bananna cat",
 			Expected: 0.0,
 			Error:    nil,
 		},
 		{
-			Name:     "TwoThirdsMatch",
+			Name:     "SuccessTwoThirdsMatch",
 			First:    "apple youngster zebra",
 			Second:   "apple bananna zebra",
 			Expected: (2.0 / 3.0),
 			Error:    nil,
 		},
 		{
-			Name:     "ErrorNotDefined",
+			Name:     "ErrorUndefinedValue",
 			First:    "returns error undefined value",
 			Second:   "returns error undefined value",
 			Expected: 0.0,
