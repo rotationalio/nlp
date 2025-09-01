@@ -88,7 +88,7 @@ func TestTypeCounterTypeCount(t *testing.T) {
 		typecounter, err := tokens.NewTypeCounter()
 		require.NoError(t, err)
 
-		text := "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n "
+		text := "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_"
 		expected := map[string]int{
 			"the":   2,
 			"quick": 1,
@@ -105,6 +105,8 @@ func TestTypeCounterTypeCount(t *testing.T) {
 			"f": 1,
 			"b": 1,
 			"i": 1,
+			// from "_snake_case_"
+			"_snake_case_": 1,
 		}
 
 		//test
