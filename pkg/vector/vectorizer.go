@@ -49,19 +49,22 @@ func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectoriz
 	vectorizer.vocab = vocab
 
 	// Set defaults
+
 	if vectorizer.lang == enum.LanguageUnknown {
 		vectorizer.lang = enum.LanguageEnglish
 	}
+
 	if vectorizer.tokenizer == nil {
-		// create with default regex
 		vectorizer.tokenizer = tokens.NewRegexTokenizer(tokens.RegexTokenizerWithLanguage(vectorizer.lang))
 	}
+
 	if vectorizer.stemmer == nil {
 		if vectorizer.stemmer, err = stemming.NewPorter2Stemmer(vectorizer.lang); err != nil {
 			return nil, err
 		}
 	}
-	if !vectorizer.typeCounter.Initialized() {
+
+	if vectorizer.typeCounter == nil || !vectorizer.typeCounter.Initialized() {
 		if vectorizer.typeCounter, err = tokens.NewTypeCounter(
 			tokens.TypeCounterWithLanguage(vectorizer.lang),
 			tokens.TypeCounterWithTokenizer(vectorizer.tokenizer),
@@ -70,6 +73,7 @@ func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectoriz
 			return nil, err
 		}
 	}
+
 	if vectorizer.method == VectorizeUnknown {
 		vectorizer.method = VectorizeOneHot
 	}
