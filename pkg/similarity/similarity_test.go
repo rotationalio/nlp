@@ -59,5 +59,30 @@ func TestNewCosineSimilarizer(t *testing.T) {
 }
 
 func TestCosineSimilarity(t *testing.T) {
-	// TODO test CosineSimilarizer.Similarity() with several different text chunks
+	t.Run("SuccessExactMatch", func(t *testing.T) {
+		// setup
+		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
+		similarizer, err := similarity.NewCosineSimilarizer(vocab)
+		require.NoError(t, err)
+		require.NotNil(t, similarizer)
+
+		// test
+		sim, err := similarizer.Similarity("apple bananna cat", "apple bananna cat")
+		require.NoError(t, err)
+		require.Equal(t, 1.0, sim)
+	})
+
+	t.Run("SuccessZeroMatch", func(t *testing.T) {
+		// setup
+		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
+		similarizer, err := similarity.NewCosineSimilarizer(vocab)
+		require.NoError(t, err)
+		require.NotNil(t, similarizer)
+
+		// test
+		sim, err := similarizer.Similarity("xylophone youngster zebra", "apple bananna cat")
+		require.NoError(t, err)
+		require.Equal(t, 0.0, sim)
+	})
+
 }

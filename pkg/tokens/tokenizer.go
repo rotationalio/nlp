@@ -18,11 +18,8 @@ type Tokenizer interface {
 // Regex Expressions for Tokenizing
 // ############################################################################
 
-// Basic English alphanumeric tokenization. Does not account for special number
-// formats or any words with punctuation in them.
-//
-//	`A-Za-z0-9`
-const REGEX_ENGLISH_ALPHANUMERIC = `A-Za-z0-9`
+// Basic English word tokenization using the regex `\b\w+\b`.
+const REGEX_ENGLISH_WORDS = `\b\w+\b`
 
 // ############################################################################
 // RegexTokenizer
@@ -41,7 +38,7 @@ type RegexTokenizer struct {
 //
 // Defaults:
 //   - Language: [LanguageEnglish]
-//   - Regex: [REGEX_ENGLISH_ALPHANUMERIC]
+//   - Regex: [REGEX_ENGLISH_WORDS]
 func NewRegexTokenizer(opts ...RegexTokenizerOption) *RegexTokenizer {
 	// Set options
 	tokenizer := &RegexTokenizer{}
@@ -54,7 +51,7 @@ func NewRegexTokenizer(opts ...RegexTokenizerOption) *RegexTokenizer {
 		tokenizer.lang = enum.LanguageEnglish
 	}
 	if tokenizer.regex == "" {
-		tokenizer.regex = REGEX_ENGLISH_ALPHANUMERIC
+		tokenizer.regex = REGEX_ENGLISH_WORDS
 	}
 
 	return tokenizer
