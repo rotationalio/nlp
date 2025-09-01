@@ -18,8 +18,13 @@ type Tokenizer interface {
 // Regex Expressions for Tokenizing
 // ############################################################################
 
-// Basic English word tokenization using the regex `\b\w+\b`.
-const REGEX_ENGLISH_WORDS = `\b\w+\b`
+const (
+	// English word tokenization for words using the "word character" ('\w')
+	// which includes letters, numbers, and underscores
+	REGEX_ENGLISH_WORDS = `\b\w+\b`
+	// English word tokenization for words using lowercase and uppercase letters
+	REGEX_ENGLISH_ALPHABET_ONLY = `\b[A-Za-z]+\b`
+)
 
 // ############################################################################
 // RegexTokenizer
