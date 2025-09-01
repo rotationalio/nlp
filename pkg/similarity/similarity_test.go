@@ -1,10 +1,12 @@
 package similarity_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/errors"
 	"go.rtnl.ai/nlp/pkg/similarity"
 	"go.rtnl.ai/nlp/pkg/tokens"
 	"go.rtnl.ai/nlp/pkg/vector"
@@ -72,7 +74,7 @@ func TestCosineSimilarity(t *testing.T) {
 		require.Equal(t, 1.0, sim)
 	})
 
-	t.Run("SuccessZeroMatch", func(t *testing.T) {
+	t.Run("SuccessZeroSimilarity", func(t *testing.T) {
 		// setup
 		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
 		similarizer, err := similarity.NewCosineSimilarizer(vocab)
@@ -85,4 +87,38 @@ func TestCosineSimilarity(t *testing.T) {
 		require.Equal(t, 0.0, sim)
 	})
 
+	t.Run("SuccessPartialMatch", func(t *testing.T) {
+		// setup
+		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
+		similarizer, err := similarity.NewCosineSimilarizer(vocab)
+		require.NoError(t, err)
+		require.NotNil(t, similarizer)
+
+		// test
+		sim, err := similarizer.Similarity("apple youngster zebra", "apple bananna zebra")
+		require.NoError(t, err)
+		require.True(t, almostEqual(sim, (2.0/3.0), 1e-12))
+	})
+
+	t.Run("ErrorNotDefined", func(t *testing.T) {
+		// setup
+		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
+		similarizer, err := similarity.NewCosineSimilarizer(vocab)
+		require.NoError(t, err)
+		require.NotNil(t, similarizer)
+
+		// test
+		sim, err := similarizer.Similarity("returns error undefined value", "returns error undefined value")
+		require.Error(t, err, errors.ErrUndefinedValue)
+		require.Equal(t, 0.0, sim)
+	})
+}
+
+// ############################################################################
+// Helpers
+// ############################################################################
+
+// Returns true if the difference in a and b is less than epsilon.
+func almostEqual(a, b, epsilon float64) bool {
+	return math.Abs(a-b) <= epsilon
 }
