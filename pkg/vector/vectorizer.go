@@ -172,7 +172,7 @@ func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector Vector, err erro
 type VectorizationMethod uint8
 
 const (
-	VectorizeUnknown = iota
+	VectorizeUnknown VectorizationMethod = iota
 	VectorizeOneHot
 	VectorizeFrequency
 )
