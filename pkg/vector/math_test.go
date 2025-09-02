@@ -237,7 +237,7 @@ func TestLen(t *testing.T) {
 
 // Returns a [vector.Vector] that goes from 0 to `upper`.
 func rangeVector(upper int) (vec vector.Vector) {
-	vec = vector.Vector{}
+	vec = make(vector.Vector, 0, upper)
 	for i := range upper {
 		vec = append(vec, float64(i))
 	}
@@ -246,8 +246,8 @@ func rangeVector(upper int) (vec vector.Vector) {
 
 // Returns a [vector.Vector] that repeats the `values` list `n` times.
 func repeatingVector(n int, values ...float64) (vec vector.Vector) {
-	vec = vector.Vector{}
-	for _ = range n {
+	vec = make(vector.Vector, 0, n*len(values))
+	for range n {
 		vec = append(vec, values...)
 	}
 	return vec
