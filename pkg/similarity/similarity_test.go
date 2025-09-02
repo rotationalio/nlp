@@ -69,9 +69,12 @@ func TestCosineSimilarity(t *testing.T) {
 		Error    error
 	}{
 		{
-			Name:     "SuccessExactMatch",
-			First:    "apple bananna cat",
-			Second:   "apple bananna cat",
+			Name:   "SuccessExactMatch",
+			First:  "apple bananna cat",
+			Second: "apple bananna cat",
+			// NOTE: this test will fail if the return value from
+			// [similarity.CosineSimilarizer.Similarity] is not clamped to
+			// [-1.0, 1.0]
 			Expected: 1.0,
 			Error:    nil,
 		},

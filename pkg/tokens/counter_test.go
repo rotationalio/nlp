@@ -73,7 +73,8 @@ func TestTypeCounterTypeCount(t *testing.T) {
 			"fox":   2,
 			"jump":  1,
 			"over":  1,
-			"lazi":  1,
+			// Porter2 stemmer algorithm does lazy -> lazi
+			"lazi": 1,
 		}
 
 		//test
@@ -96,8 +97,9 @@ func TestTypeCounterTypeCount(t *testing.T) {
 			"fox":   2,
 			"jump":  1,
 			"over":  1,
-			"lazi":  1,
-			"100":   1,
+			// Porter2 stemmer algorithm does lazy -> lazi
+			"lazi": 1,
+			"100":  1,
 			// from "99.9"
 			"99": 1,
 			"9":  1,

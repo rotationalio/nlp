@@ -18,9 +18,11 @@ func TestCosine(t *testing.T) {
 		Error    error
 	}{
 		{
-			Name:     "Success_SameVectors",
-			First:    vector.Vector{1, 2, 3},
-			Second:   vector.Vector{1, 2, 3},
+			Name:   "Success_SameVectors",
+			First:  vector.Vector{1, 2, 3},
+			Second: vector.Vector{1, 2, 3},
+			// NOTE: this test will fail if the return value from [vector.Cosine]
+			// is not clamped to [-1.0, 1.0]
 			Expected: 1.0,
 			Error:    nil,
 		},
@@ -32,9 +34,11 @@ func TestCosine(t *testing.T) {
 			Error:    nil,
 		},
 		{
-			Name:     "Success_OppositeVectors",
-			First:    vector.Vector{1, 1, 1},
-			Second:   vector.Vector{-1, -1, -1},
+			Name:   "Success_OppositeVectors",
+			First:  vector.Vector{1, 1, 1},
+			Second: vector.Vector{-1, -1, -1},
+			// NOTE: this test will fail if the return value from [vector.Cosine]
+			// is not clamped to [-1.0, 1.0]
 			Expected: -1.0,
 			Error:    nil,
 		},
