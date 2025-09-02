@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/shared"
 )
 
 // ############################################################################
@@ -542,8 +541,13 @@ func (p *Porter2Stemmer) longestMatchingSuffix(start, end int, suffixes ...strin
 		return ""
 	}
 
-	// Sort the suffixes by length and lexicographically
-	shared.SortByLengthAndLexicographically(suffixes)
+	// Sort the suffixes by length and then lexicographically
+	slices.SortFunc(suffixes, func(a, b string) int {
+		if len(a) == len(b) {
+			return strings.Compare(a, b)
+		}
+		return len(b) - len(a)
+	})
 
 	// Find the first matching suffix
 	for _, suffix := range suffixes {

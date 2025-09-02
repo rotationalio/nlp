@@ -2,6 +2,7 @@ package similarity
 
 import (
 	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/mathematics"
 	"go.rtnl.ai/nlp/pkg/tokens"
 	"go.rtnl.ai/nlp/pkg/vector"
 )
@@ -19,7 +20,7 @@ type Similarizer interface {
 // ############################################################################
 
 // CosineSimilarizer can be used to calculate the cosine similarity of two text
-// chunks.
+// strings.
 type CosineSimilarizer struct {
 	vocab      []string
 	lang       enum.Language
@@ -97,7 +98,8 @@ func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err err
 		return 0.0, err
 	}
 
-	return similarity, nil
+	// Return value bounded to [-1.0, 1.0]
+	return mathematics.BoundToRange(similarity, -1.0, 1.0), nil
 }
 
 // ############################################################################

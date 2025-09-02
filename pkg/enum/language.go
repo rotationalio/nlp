@@ -8,7 +8,7 @@ import (
 type Language uint16
 
 const (
-	LanguageUnknown = iota
+	LanguageUnknown Language = iota
 	LanguageEnglish
 )
 

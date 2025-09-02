@@ -12,7 +12,7 @@ import (
 // ############################################################################
 
 type Vectorizer interface {
-	Vectorize(chunk string) (vector Vector, err error)
+	Vectorize(text string) (vector Vector, err error)
 }
 
 // ############################################################################
@@ -49,19 +49,22 @@ func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectoriz
 	vectorizer.vocab = vocab
 
 	// Set defaults
+
 	if vectorizer.lang == enum.LanguageUnknown {
 		vectorizer.lang = enum.LanguageEnglish
 	}
+
 	if vectorizer.tokenizer == nil {
-		// create with default regex
 		vectorizer.tokenizer = tokens.NewRegexTokenizer(tokens.RegexTokenizerWithLanguage(vectorizer.lang))
 	}
+
 	if vectorizer.stemmer == nil {
 		if vectorizer.stemmer, err = stemming.NewPorter2Stemmer(vectorizer.lang); err != nil {
 			return nil, err
 		}
 	}
-	if !vectorizer.typeCounter.Initialized() {
+
+	if vectorizer.typeCounter == nil {
 		if vectorizer.typeCounter, err = tokens.NewTypeCounter(
 			tokens.TypeCounterWithLanguage(vectorizer.lang),
 			tokens.TypeCounterWithTokenizer(vectorizer.tokenizer),
@@ -70,6 +73,7 @@ func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectoriz
 			return nil, err
 		}
 	}
+
 	if vectorizer.method == VectorizeUnknown {
 		vectorizer.method = VectorizeOneHot
 	}
@@ -107,31 +111,33 @@ func (c *CountVectorizer) Method() VectorizationMethod {
 	return c.method
 }
 
-// Vectorizes the chunk of text.
-func (v *CountVectorizer) Vectorize(chunk string) (vector Vector, err error) {
+// Vectorizes the string of text.
+func (v *CountVectorizer) Vectorize(text string) (vector Vector, err error) {
 	switch v.method {
 	case VectorizeOneHot:
-		return v.VectorizeOneHot(chunk)
+		return v.VectorizeOneHot(text)
 	case VectorizeFrequency:
-		return v.VectorizeFrequency(chunk)
+		return v.VectorizeFrequency(text)
 	}
 	return nil, errors.ErrMethodNotSupported
 }
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the given
-// chunk of text and given vocabulary map. The vector returned has a value of
-// the count of word instances within the chunk for each vocabulary word index.
-func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector Vector, err error) {
-	// Type count the chunk
+// string of text and given vocabulary map. The vector returned has a value of
+// the count of word instances within the string for each vocabulary word index.
+func (v *CountVectorizer) VectorizeFrequency(text string) (vector Vector, err error) {
+	// Type count the text
 	var types map[string]int
-	if types, err = v.typeCounter.TypeCount(chunk); err != nil {
+	if types, err = v.typeCounter.TypeCount(text); err != nil {
 		return nil, err
 	}
 
 	// Create the vector from the vocabulary
 	vector = make(Vector, len(v.vocab))
 	for i, word := range v.vocab {
-		if count, ok := types[word]; ok {
+		// Stem the vocab word with the same stemmer as the type counter uses
+		stem := v.typeCounter.Stemmer().Stem(word)
+		if count, ok := types[stem]; ok {
 			vector[i] = float64(count)
 		}
 	}
@@ -139,13 +145,13 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector Vector, err e
 	return vector, nil
 }
 
-// VectorizeOneHot returns a one-hot encoding vector for the given chunk of text
+// VectorizeOneHot returns a one-hot encoding vector for the given text
 // and given vocabulary map. The vector returned has a value of 1 for each
-// vocabulary word index if it is present within the chunk of text and 0
+// vocabulary word index if it is present within the text and 0
 // otherwise.
-func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector Vector, err error) {
+func (v *CountVectorizer) VectorizeOneHot(text string) (vector Vector, err error) {
 	// Get the frequency encoding
-	if vector, err = v.VectorizeFrequency(chunk); err != nil {
+	if vector, err = v.VectorizeFrequency(text); err != nil {
 		return nil, err
 	}
 
@@ -166,7 +172,7 @@ func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector Vector, err erro
 type VectorizationMethod uint8
 
 const (
-	VectorizeUnknown = iota
+	VectorizeUnknown VectorizationMethod = iota
 	VectorizeOneHot
 	VectorizeFrequency
 )

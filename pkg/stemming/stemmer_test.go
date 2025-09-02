@@ -30,7 +30,7 @@ func TestStemmers(t *testing.T) {
 			ExpectedPath: "testdata/Porter2Stemmer/voc.txt", // no-op -> same as input
 		},
 		{
-			TestName:     "Porter2Stemmer [English]",
+			TestName:     "Porter2Stemmer [LanguageEnglish]",
 			Stemmer:      mustNewPorter2Stemmer(enum.LanguageEnglish),
 			InputPath:    "testdata/Porter2Stemmer/voc.txt",
 			ExpectedPath: "testdata/Porter2Stemmer/output.txt",

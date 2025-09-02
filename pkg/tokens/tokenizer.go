@@ -11,18 +11,20 @@ import (
 // ############################################################################
 
 type Tokenizer interface {
-	Tokenize(chunk string) (tokens []string, err error)
+	Tokenize(text string) (tokens []string, err error)
 }
 
 // ############################################################################
 // Regex Expressions for Tokenizing
 // ############################################################################
 
-// Basic English alphanumeric tokenization. Does not account for special number
-// formats or any words with punctuation in them.
-//
-//	`A-Za-z0-9`
-const REGEX_ENGLISH_ALPHANUMERIC = `A-Za-z0-9`
+const (
+	// English word tokenization for words using the "word character" ('\w')
+	// which includes letters, numbers, and underscores
+	REGEX_ENGLISH_WORDS = `\b\w+\b`
+	// English word tokenization for words using lowercase and uppercase letters
+	REGEX_ENGLISH_ALPHABET_ONLY = `\b[A-Za-z]+\b`
+)
 
 // ############################################################################
 // RegexTokenizer
@@ -41,7 +43,7 @@ type RegexTokenizer struct {
 //
 // Defaults:
 //   - Language: [LanguageEnglish]
-//   - Regex: [REGEX_ENGLISH_ALPHANUMERIC]
+//   - Regex: [REGEX_ENGLISH_WORDS]
 func NewRegexTokenizer(opts ...RegexTokenizerOption) *RegexTokenizer {
 	// Set options
 	tokenizer := &RegexTokenizer{}
@@ -54,7 +56,7 @@ func NewRegexTokenizer(opts ...RegexTokenizerOption) *RegexTokenizer {
 		tokenizer.lang = enum.LanguageEnglish
 	}
 	if tokenizer.regex == "" {
-		tokenizer.regex = REGEX_ENGLISH_ALPHANUMERIC
+		tokenizer.regex = REGEX_ENGLISH_WORDS
 	}
 
 	return tokenizer
@@ -70,8 +72,8 @@ func (t *RegexTokenizer) Regex() string {
 	return t.regex
 }
 
-// Tokenizes a chunk of text using [regexp.Regexp.FindAllString].
-func (t *RegexTokenizer) Tokenize(chunk string) (tokens []string, err error) {
+// Tokenizes a text string using [regexp.Regexp.FindAllString].
+func (t *RegexTokenizer) Tokenize(text string) (tokens []string, err error) {
 	// Compile regexp
 	var r *regexp.Regexp
 	if r, err = regexp.Compile(t.regex); err != nil {
@@ -79,7 +81,7 @@ func (t *RegexTokenizer) Tokenize(chunk string) (tokens []string, err error) {
 	}
 
 	// Tokenize with regex
-	tokens = r.FindAllString(chunk, -1)
+	tokens = r.FindAllString(text, -1)
 
 	return tokens, nil
 }
