@@ -1,4 +1,4 @@
-package shared
+package stopwords
 
 import (
 	"slices"
@@ -16,7 +16,7 @@ import (
 func IsStopWord(word string, lang enum.Language) bool {
 	switch lang {
 	case enum.LanguageEnglish:
-		return slices.Contains(StopWordsEnglish[:], strings.TrimSpace(strings.ToLower(word)))
+		return slices.Contains(English[:], strings.TrimSpace(strings.ToLower(word)))
 	}
 	return false
 }
@@ -29,7 +29,7 @@ func IsStopWord(word string, lang enum.Language) bool {
 // words list on GitHub], which is BSD 3-clause licensed.
 //
 // [snowballstem.org stop words list on GitHub]: https://github.com/snowballstem/snowball-website/blob/1f7a15d10924fb38f90519d95a875342cf3e87ba/algorithms/english/stop.txt
-var StopWordsEnglish = [174]string{
+var English = [174]string{
 	"a", "about", "above", "after", "again", "against", "all", "am", "an",
 	"and", "any", "are", "aren't", "as", "at", "be", "because", "been",
 	"before", "being", "below", "between", "both", "but", "by", "can't",
