@@ -81,7 +81,7 @@ func TestTypeCounterTypeCount(t *testing.T) {
 		count, err := typecounter.TypeCount(text)
 		require.NoError(t, err)
 		require.NotNil(t, count)
-		require.InDeltaMapValues(t, expected, count, 0.0)
+		require.Equal(t, expected, count)
 	})
 
 	t.Run("SuccessQuickBrownFoxWithSymbolsAndNumbers", func(t *testing.T) {
@@ -115,6 +115,6 @@ func TestTypeCounterTypeCount(t *testing.T) {
 		count, err := typecounter.TypeCount(text)
 		require.NoError(t, err)
 		require.NotNil(t, count)
-		require.InDeltaMapValues(t, expected, count, 0.0)
+		require.Equal(t, expected, count)
 	})
 }
