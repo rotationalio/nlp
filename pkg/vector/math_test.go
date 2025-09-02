@@ -44,11 +44,10 @@ func TestCosine(t *testing.T) {
 			Error:    nil,
 		},
 		{
-			Name: "Success_7056LengthVectors",
-			// Where "First" has a 1, "Second" has a 2 and vice-versa.
-			First:    vector.Vector{}, //FIXME: not by hand,
-			Second:   vector.Vector{}, //FIXME: not by hand,
-			Expected: 0.8,             // calculated in Python 3.13.4
+			Name:     "Success_7056LengthVectors",
+			First:    repeatingVector(7056/2, 1, 2),
+			Second:   repeatingVector(7056/2, 2, 1),
+			Expected: 0.8, // calculated in Python 3.13.4
 			Error:    nil,
 		},
 		{
@@ -124,11 +123,10 @@ func TestDotProduct(t *testing.T) {
 			Error:    nil,
 		},
 		{
-			Name: "Success_7056LengthVectors",
-			// Where "First" has a 1, "Second" has a 2 and vice-versa.
-			First:    vector.Vector{}, //FIXME: not by hand
-			Second:   vector.Vector{}, //FIXME: not by hand
-			Expected: 14112.0,         // calculated in Python 3.13.4
+			Name:     "Success_7056LengthVectors",
+			First:    repeatingVector(7056/2, 1, 2),
+			Second:   repeatingVector(7056/2, 2, 1),
+			Expected: 14112.0, // calculated in Python 3.13.4
 			Error:    nil,
 		},
 		{
@@ -208,7 +206,7 @@ func TestVectorLength(t *testing.T) {
 		{
 			Name: "ZeroTo9999_Vector",
 			// Vector has 10_000 elements going from 0 to 9999
-			Vector:   vector.Vector{},  //FIXME: not by hand
+			Vector:   rangeVector(10_000),
 			Expected: 577306.967739001, // calculated in Python 3.13.4
 			Error:    nil,
 		},
@@ -231,4 +229,26 @@ func TestLen(t *testing.T) {
 	require.Equal(t, reflect.Slice, kind)
 	kind2 := reflect.TypeOf(vec[0]).Kind()
 	require.Equal(t, reflect.Float64, kind2)
+}
+
+// ############################################################################
+// Helpers
+// ############################################################################
+
+// Returns a [vector.Vector] that goes from 0 to `upper`.
+func rangeVector(upper int) (vec vector.Vector) {
+	vec = vector.Vector{}
+	for i := range upper {
+		vec = append(vec, float64(i))
+	}
+	return vec
+}
+
+// Returns a [vector.Vector] that repeats the `values` list `n` times.
+func repeatingVector(n int, values ...float64) (vec vector.Vector) {
+	vec = vector.Vector{}
+	for _ = range n {
+		vec = append(vec, values...)
+	}
+	return vec
 }
