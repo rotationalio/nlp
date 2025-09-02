@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/pkg/mathematics"
 )
 
 // Cosine returns the cosine of the angle between two vectors as a value between
@@ -30,7 +31,7 @@ func Cosine(a, b Vector) (cosine float64, err error) {
 	}
 
 	// Return final cosine value clamped to [-1.0, 1.0]
-	return math.Max(-1.0, math.Min(dotprod/vlenprod, 1.0)), nil
+	return mathematics.BoundToRange(dotprod/vlenprod, -1.0, 1.0), nil
 }
 
 // DotProduct returns the dot product of the two vectors (as defined by SLP 3rd

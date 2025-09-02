@@ -1,9 +1,8 @@
 package similarity
 
 import (
-	"math"
-
 	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/mathematics"
 	"go.rtnl.ai/nlp/pkg/tokens"
 	"go.rtnl.ai/nlp/pkg/vector"
 )
@@ -100,7 +99,7 @@ func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err err
 	}
 
 	// Return value bounded to [-1.0, 1.0]
-	return math.Max(-1.0, math.Min(similarity, 1.0)), nil
+	return mathematics.BoundToRange(similarity, -1.0, 1.0), nil
 }
 
 // ############################################################################
