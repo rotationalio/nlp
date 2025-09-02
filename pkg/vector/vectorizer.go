@@ -12,7 +12,7 @@ import (
 // ############################################################################
 
 type Vectorizer interface {
-	Vectorize(chunk string) (vector Vector, err error)
+	Vectorize(text string) (vector Vector, err error)
 }
 
 // ############################################################################
@@ -111,24 +111,24 @@ func (c *CountVectorizer) Method() VectorizationMethod {
 	return c.method
 }
 
-// Vectorizes the chunk of text.
-func (v *CountVectorizer) Vectorize(chunk string) (vector Vector, err error) {
+// Vectorizes the string of text.
+func (v *CountVectorizer) Vectorize(text string) (vector Vector, err error) {
 	switch v.method {
 	case VectorizeOneHot:
-		return v.VectorizeOneHot(chunk)
+		return v.VectorizeOneHot(text)
 	case VectorizeFrequency:
-		return v.VectorizeFrequency(chunk)
+		return v.VectorizeFrequency(text)
 	}
 	return nil, errors.ErrMethodNotSupported
 }
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the given
-// chunk of text and given vocabulary map. The vector returned has a value of
-// the count of word instances within the chunk for each vocabulary word index.
-func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector Vector, err error) {
-	// Type count the chunk
+// string of text and given vocabulary map. The vector returned has a value of
+// the count of word instances within the string for each vocabulary word index.
+func (v *CountVectorizer) VectorizeFrequency(text string) (vector Vector, err error) {
+	// Type count the text
 	var types map[string]int
-	if types, err = v.typeCounter.TypeCount(chunk); err != nil {
+	if types, err = v.typeCounter.TypeCount(text); err != nil {
 		return nil, err
 	}
 
@@ -145,13 +145,13 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector Vector, err e
 	return vector, nil
 }
 
-// VectorizeOneHot returns a one-hot encoding vector for the given chunk of text
+// VectorizeOneHot returns a one-hot encoding vector for the given text
 // and given vocabulary map. The vector returned has a value of 1 for each
-// vocabulary word index if it is present within the chunk of text and 0
+// vocabulary word index if it is present within the text and 0
 // otherwise.
-func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector Vector, err error) {
+func (v *CountVectorizer) VectorizeOneHot(text string) (vector Vector, err error) {
 	// Get the frequency encoding
-	if vector, err = v.VectorizeFrequency(chunk); err != nil {
+	if vector, err = v.VectorizeFrequency(text); err != nil {
 		return nil, err
 	}
 

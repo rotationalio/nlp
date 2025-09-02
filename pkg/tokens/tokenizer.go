@@ -72,7 +72,7 @@ func (t *RegexTokenizer) Regex() string {
 	return t.regex
 }
 
-// Tokenizes a chunk of text using [regexp.Regexp.FindAllString].
+// Tokenizes a text string using [regexp.Regexp.FindAllString].
 func (t *RegexTokenizer) Tokenize(text string) (tokens []string, err error) {
 	// Compile regexp
 	var r *regexp.Regexp

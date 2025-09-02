@@ -21,7 +21,7 @@ type Similarizer interface {
 // ############################################################################
 
 // CosineSimilarizer can be used to calculate the cosine similarity of two text
-// chunks.
+// strings.
 type CosineSimilarizer struct {
 	vocab      []string
 	lang       enum.Language
