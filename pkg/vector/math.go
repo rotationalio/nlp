@@ -6,28 +6,31 @@ import (
 	"go.rtnl.ai/nlp/pkg/errors"
 )
 
-// Cosine returns the cosine of the angle between two vectors; which can be used
-// as a similarity metric (as defined by SLP 3rd Edition section 6.4 fig 6.10).
-// If the vectors do not have the same number of elements, an error will be
-// returned.
+// Cosine returns the cosine of the angle between two vectors as a value between
+// [-1.0, 1.0], as defined by SLP 3rd Edition section 6.4 fig 6.10. If the
+// vectors do not have the same number of elements or either of the vectors has
+// a length of zero, an error will be returned.
 func Cosine(a, b Vector) (cosine float64, err error) {
 	// Ensure vectors have the same number of elements
 	if len(a) != len(b) {
 		return 0.0, errors.ErrUnequalLengthVectors
 	}
 
-	// Calculate the dot product and the product of the two vector's lengths
+	// Calculate the dot product
 	var dotprod, vlenprod float64
 	if dotprod, err = DotProduct(a, b); err != nil {
 		return 0.0, err
 	}
-	vlenprod = VectorLength(a) * VectorLength(b)
 
+	// Calculate the product of the two vector's lengths
+	vlenprod = VectorLength(a) * VectorLength(b)
 	if vlenprod == 0.0 {
 		// Cosine is undefined for zero length vectors
 		return 0.0, errors.ErrUndefinedValue
 	}
-	return dotprod / vlenprod, nil
+
+	// Return final cosine value clamped to [-1.0, 1.0]
+	return math.Max(-1.0, math.Min(dotprod/vlenprod, 1.0)), nil
 }
 
 // DotProduct returns the dot product of the two vectors (as defined by SLP 3rd
