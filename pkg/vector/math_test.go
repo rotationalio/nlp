@@ -88,7 +88,7 @@ func TestCosine(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			require.Truef(t, almostEqual(tc.Expected, val, 1e-12), "expected %f got %f a difference of %e", tc.Expected, val, math.Abs(tc.Expected-val))
+			require.InDeltaf(t, tc.Expected, val, 1e-12, "expected %f got %f a difference of %e", tc.Expected, val, math.Abs(tc.Expected-val))
 		})
 	}
 }
@@ -172,7 +172,7 @@ func TestDotProduct(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			require.Truef(t, almostEqual(tc.Expected, val, 1e-12), "expected %f got %f a difference of %e", tc.Expected, val, math.Abs(tc.Expected-val))
+			require.InDeltaf(t, tc.Expected, val, 1e-12, "expected %f got %f a difference of %e", tc.Expected, val, math.Abs(tc.Expected-val))
 		})
 	}
 }
@@ -222,16 +222,7 @@ func TestVectorLength(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.Name, func(t *testing.T) {
 			val := vector.VectorLength(tc.Vector)
-			require.Truef(t, almostEqual(tc.Expected, val, 1e-12), "expected %f got %f a difference of %e", tc.Expected, val, math.Abs(tc.Expected-val))
+			require.InDeltaf(t, tc.Expected, val, 1e-12, "expected %f got %f a difference of %e", tc.Expected, val, math.Abs(tc.Expected-val))
 		})
 	}
-}
-
-// ############################################################################
-// Helpers
-// ############################################################################
-
-// Returns true if the difference in a and b is less than epsilon.
-func almostEqual(a, b, epsilon float64) bool {
-	return math.Abs(a-b) <= epsilon
 }

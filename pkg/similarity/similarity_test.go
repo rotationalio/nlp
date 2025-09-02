@@ -113,16 +113,7 @@ func TestCosineSimilarity(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			require.True(t, almostEqual(tc.Expected, sim, 1e-12))
+			require.InDeltaf(t, tc.Expected, sim, 1e-12, "expected %f got %f a difference of %e", tc.Expected, sim, math.Abs(tc.Expected-sim))
 		})
 	}
-}
-
-// ############################################################################
-// Helpers
-// ############################################################################
-
-// Returns true if the difference in a and b is less than epsilon.
-func almostEqual(a, b, epsilon float64) bool {
-	return math.Abs(a-b) <= epsilon
 }
