@@ -24,7 +24,7 @@ func Cosine(a, b Vector) (cosine float64, err error) {
 	}
 
 	// Calculate the product of the two vector's lengths
-	vlenprod = VectorLength(a) * VectorLength(b)
+	vlenprod = Magnitude(a) * Magnitude(b)
 	if vlenprod == 0.0 {
 		// Cosine is undefined for zero length vectors
 		return 0.0, errors.ErrUndefinedValue
@@ -49,11 +49,16 @@ func DotProduct(a, b Vector) (product float64, err error) {
 	return product, nil
 }
 
-// VectorLength returns the vector length (as defined by SLP 3rd Edition section
-// 6.4 fig 6.8).
-func VectorLength(v Vector) (length float64) {
+// Magnitude returns the vector length (aka magnitude) (as defined by SLP 3rd
+// Edition section 6.4 fig 6.8).
+func Magnitude(v Vector) (length float64) {
 	for _, e := range v {
 		length += e * e
 	}
 	return math.Sqrt(length)
+}
+
+// Len returns the number of elements in the [Vector].
+func Len(v Vector) (elements int) {
+	return len(v)
 }
