@@ -11,7 +11,7 @@ import (
 // ############################################################################
 
 type Tokenizer interface {
-	//TODO refactor to use []Token type for output
+	//TODO refactor to use *TokenList type for output
 	Tokenize(text string) (tokens []string, err error)
 }
 
