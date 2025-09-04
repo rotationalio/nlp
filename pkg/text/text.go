@@ -2,6 +2,7 @@ package text
 
 // TODO Text type:
 // TODO func NewText(text string, options ...TextOption) *Text {}
+// TODO func (t *Text) Text() string {}
 // TODO func (t *Text) Tokens() *TokenList {}
 // TODO func (t *Text) Words() *TokenList { return t.Tokens() }
 // TODO func (t *Text) Stems() *TokenList {}
