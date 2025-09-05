@@ -134,7 +134,7 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector vector.Vector
 	}
 
 	// Create the vector from the vocabulary
-	vector = make([]float64, 0, len(v.vocab))
+	vector = make([]float64, len(v.vocab))
 	for i, word := range v.vocab {
 		// Stem the vocab word with the same stemmer as the type counter uses
 		stem := v.typeCounter.Stemmer().Stem(word)
