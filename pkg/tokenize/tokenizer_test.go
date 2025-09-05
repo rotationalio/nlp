@@ -1,37 +1,37 @@
-package tokens_test
+package tokenize_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/tokens"
+	"go.rtnl.ai/nlp/pkg/tokenize"
 )
 
 func TestNewRegexTokenizer(t *testing.T) {
 	t.Run("SuccessDefaults", func(t *testing.T) {
-		tok := tokens.NewRegexTokenizer()
+		tok := tokenize.NewRegexTokenizer()
 		require.NotNil(t, tok)
 	})
 
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
 		lang := enum.LanguageEnglish
-		langOpt := tokens.RegexTokenizerWithLanguage(lang)
+		langOpt := tokenize.RegexTokenizerWithLanguage(lang)
 
 		//test
-		tok := tokens.NewRegexTokenizer(langOpt)
+		tok := tokenize.NewRegexTokenizer(langOpt)
 		require.NotNil(t, tok)
 		require.Equal(t, lang, tok.Language())
 	})
 
 	t.Run("SuccessRegexOption_REGEX_ENGLISH_ALPHABET_ONLY", func(t *testing.T) {
 		//setup
-		regex := tokens.REGEX_ENGLISH_ALPHABET_ONLY
-		regexOpt := tokens.RegexTokenizerWithRegex(regex)
+		regex := tokenize.REGEX_ENGLISH_ALPHABET_ONLY
+		regexOpt := tokenize.RegexTokenizerWithRegex(regex)
 
 		//test
-		tok := tokens.NewRegexTokenizer(regexOpt)
+		tok := tokenize.NewRegexTokenizer(regexOpt)
 		require.NotNil(t, tok)
 		require.Equal(t, regex, tok.Regex())
 	})
@@ -47,7 +47,7 @@ func TestRegexTokenizer(t *testing.T) {
 		{
 			Name:  "QuickBrownFox-REGEX_ENGLISH_WORDS",
 			Text:  "The quick brown fox jumps over the lazy fox.",
-			Regex: tokens.REGEX_ENGLISH_WORDS,
+			Regex: tokenize.REGEX_ENGLISH_WORDS,
 			Expected: []string{
 				"The",
 				"quick",
@@ -63,7 +63,7 @@ func TestRegexTokenizer(t *testing.T) {
 		{
 			Name:  "QuickBrownFox-REGEX_ENGLISH_ALPHABET_ONLY",
 			Text:  "The quick brown fox jumps over the lazy fox.",
-			Regex: tokens.REGEX_ENGLISH_ALPHABET_ONLY,
+			Regex: tokenize.REGEX_ENGLISH_ALPHABET_ONLY,
 			Expected: []string{
 				"The",
 				"quick",
@@ -79,7 +79,7 @@ func TestRegexTokenizer(t *testing.T) {
 		{
 			Name:  "QuickBrownFoxWithSymbolsAndNumbers-REGEX_ENGLISH_WORDS",
 			Text:  "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_",
-			Regex: tokens.REGEX_ENGLISH_WORDS,
+			Regex: tokenize.REGEX_ENGLISH_WORDS,
 			Expected: []string{
 				"The",
 				"quick",
@@ -105,7 +105,7 @@ func TestRegexTokenizer(t *testing.T) {
 		{
 			Name:  "QuickBrownFoxWithSymbolsAndNumbers-REGEX_ENGLISH_ALPHABET_ONLY",
 			Text:  "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_",
-			Regex: tokens.REGEX_ENGLISH_ALPHABET_ONLY,
+			Regex: tokenize.REGEX_ENGLISH_ALPHABET_ONLY,
 			Expected: []string{
 				"The",
 				"quick",
@@ -129,7 +129,7 @@ func TestRegexTokenizer(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.Name, func(t *testing.T) {
 			//setup
-			tokenizer := tokens.NewRegexTokenizer(tokens.RegexTokenizerWithRegex(tc.Regex))
+			tokenizer := tokenize.NewRegexTokenizer(tokenize.RegexTokenizerWithRegex(tc.Regex))
 			require.NotNil(t, tokenizer)
 
 			//test

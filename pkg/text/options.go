@@ -1,4 +1,31 @@
 package text
 
-// TODO TextOption type
-// TODO TextOption for tokenizer, stemmer, language, similarizer, etc...
+import (
+	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/stem"
+	"go.rtnl.ai/nlp/pkg/tokenize"
+)
+
+// An [Option] configures a [Text] in [New].
+type Option func(text *Text)
+
+// Returns a function that sets the [enum.Language] on a [Text].
+func WithLanguage(lang enum.Language) Option {
+	return func(text *Text) {
+		text.lang = lang
+	}
+}
+
+// Returns a function that sets the [stem.Stemmer] on a [Text].
+func WithStemmer(stemmer stem.Stemmer) Option {
+	return func(text *Text) {
+		text.stemmer = stemmer
+	}
+}
+
+// Returns a function that sets the [tokenize.Tokenizer] on a [Text].
+func WithTokenizer(tokenizer tokenize.Tokenizer) Option {
+	return func(text *Text) {
+		text.tokenizer = tokenizer
+	}
+}

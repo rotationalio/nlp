@@ -1,17 +1,17 @@
-package tokens_test
+package tokenize_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/stemming"
-	"go.rtnl.ai/nlp/pkg/tokens"
+	"go.rtnl.ai/nlp/pkg/stem"
+	"go.rtnl.ai/nlp/pkg/tokenize"
 )
 
 func TestNewTypeCounter(t *testing.T) {
 	t.Run("SuccessDefaults", func(t *testing.T) {
-		tc, err := tokens.NewTypeCounter()
+		tc, err := tokenize.NewTypeCounter()
 		require.NoError(t, err)
 		require.NotNil(t, tc)
 	})
@@ -19,10 +19,10 @@ func TestNewTypeCounter(t *testing.T) {
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
 		lang := enum.LanguageEnglish
-		langOpt := tokens.TypeCounterWithLanguage(lang)
+		langOpt := tokenize.TypeCounterWithLanguage(lang)
 
 		//test
-		tc, err := tokens.NewTypeCounter(langOpt)
+		tc, err := tokenize.NewTypeCounter(langOpt)
 		require.NoError(t, err)
 		require.NotNil(t, tc)
 		require.Equal(t, enum.LanguageEnglish, tc.Languge())
@@ -30,11 +30,11 @@ func TestNewTypeCounter(t *testing.T) {
 
 	t.Run("SuccessTokenizerOption_RegexTokenizer", func(t *testing.T) {
 		//setup
-		tok := tokens.NewRegexTokenizer()
-		tokOpt := tokens.TypeCounterWithTokenizer(tok)
+		tok := tokenize.NewRegexTokenizer()
+		tokOpt := tokenize.TypeCounterWithTokenizer(tok)
 
 		//test
-		tc, err := tokens.NewTypeCounter(tokOpt)
+		tc, err := tokenize.NewTypeCounter(tokOpt)
 		require.NoError(t, err)
 		require.NotNil(t, tc)
 		require.Equal(t, tok, tc.Tokenizer())
@@ -43,12 +43,12 @@ func TestNewTypeCounter(t *testing.T) {
 	t.Run("SuccessStemmerOption_Porter2Stemmer", func(t *testing.T) {
 		//setup
 		lang := enum.LanguageEnglish
-		stemmer, err := stemming.NewPorter2Stemmer(lang)
+		stemmer, err := stem.NewPorter2Stemmer(lang)
 		require.NoError(t, err)
-		stemOpt := tokens.TypeCounterWithStemmer(stemmer)
+		stemOpt := tokenize.TypeCounterWithStemmer(stemmer)
 
 		//test
-		tc, err := tokens.NewTypeCounter(stemOpt)
+		tc, err := tokenize.NewTypeCounter(stemOpt)
 		require.NoError(t, err)
 		require.NotNil(t, tc)
 		require.Equal(t, stemmer, tc.Stemmer())
@@ -56,13 +56,13 @@ func TestNewTypeCounter(t *testing.T) {
 }
 
 // NOTE: this test relies on specific default settings in the
-// [tokens.TypeCounter] implementation, such as the default stemmer and default
+// [tokenize.TypeCounter] implementation, such as the default stemmer and default
 // tokenizer, so if the defaults for any of the chain of tools used by the
-// [tokens.TypeCounter] changes then this test will need to be repaired.
+// [tokenize.TypeCounter] changes then this test will need to be repaired.
 func TestTypeCounterTypeCount(t *testing.T) {
 	t.Run("SuccessQuickBrownFox", func(t *testing.T) {
 		//setup
-		typecounter, err := tokens.NewTypeCounter()
+		typecounter, err := tokenize.NewTypeCounter()
 		require.NoError(t, err)
 
 		text := "The quick brown fox jumps over the lazy fox."
@@ -86,7 +86,7 @@ func TestTypeCounterTypeCount(t *testing.T) {
 
 	t.Run("SuccessQuickBrownFoxWithSymbolsAndNumbers", func(t *testing.T) {
 		//setup
-		typecounter, err := tokens.NewTypeCounter()
+		typecounter, err := tokenize.NewTypeCounter()
 		require.NoError(t, err)
 
 		text := "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_"

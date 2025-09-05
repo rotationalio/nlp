@@ -1,10 +1,11 @@
-package vector
+package vectorize
 
 import (
 	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/errors"
-	"go.rtnl.ai/nlp/pkg/stemming"
-	"go.rtnl.ai/nlp/pkg/tokens"
+	"go.rtnl.ai/nlp/pkg/stem"
+	"go.rtnl.ai/nlp/pkg/tokenize"
+	"go.rtnl.ai/nlp/pkg/vector"
 )
 
 // ############################################################################
@@ -12,7 +13,7 @@ import (
 // ############################################################################
 
 type Vectorizer interface {
-	Vectorize(text string) (vector Vector, err error)
+	Vectorize(chunk string) (vector vector.Vector, err error)
 }
 
 // ############################################################################
@@ -24,9 +25,9 @@ type Vectorizer interface {
 type CountVectorizer struct {
 	vocab       []string
 	lang        enum.Language
-	tokenizer   tokens.Tokenizer
-	stemmer     stemming.Stemmer
-	typeCounter *tokens.TypeCounter
+	tokenizer   tokenize.Tokenizer
+	stemmer     stem.Stemmer
+	typeCounter *tokenize.TypeCounter
 	method      VectorizationMethod
 }
 
@@ -55,20 +56,20 @@ func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectoriz
 	}
 
 	if vectorizer.tokenizer == nil {
-		vectorizer.tokenizer = tokens.NewRegexTokenizer(tokens.RegexTokenizerWithLanguage(vectorizer.lang))
+		vectorizer.tokenizer = tokenize.NewRegexTokenizer(tokenize.RegexTokenizerWithLanguage(vectorizer.lang))
 	}
 
 	if vectorizer.stemmer == nil {
-		if vectorizer.stemmer, err = stemming.NewPorter2Stemmer(vectorizer.lang); err != nil {
+		if vectorizer.stemmer, err = stem.NewPorter2Stemmer(vectorizer.lang); err != nil {
 			return nil, err
 		}
 	}
 
 	if vectorizer.typeCounter == nil {
-		if vectorizer.typeCounter, err = tokens.NewTypeCounter(
-			tokens.TypeCounterWithLanguage(vectorizer.lang),
-			tokens.TypeCounterWithTokenizer(vectorizer.tokenizer),
-			tokens.TypeCounterWithStemmer(vectorizer.stemmer),
+		if vectorizer.typeCounter, err = tokenize.NewTypeCounter(
+			tokenize.TypeCounterWithLanguage(vectorizer.lang),
+			tokenize.TypeCounterWithTokenizer(vectorizer.tokenizer),
+			tokenize.TypeCounterWithStemmer(vectorizer.stemmer),
 		); err != nil {
 			return nil, err
 		}
@@ -91,18 +92,18 @@ func (c *CountVectorizer) Language() enum.Language {
 	return c.lang
 }
 
-// Returns the [CountVectorizer]s configured [tokens.Tokenizer].
-func (c *CountVectorizer) Tokenizer() tokens.Tokenizer {
+// Returns the [CountVectorizer]s configured [tokenize.Tokenizer].
+func (c *CountVectorizer) Tokenizer() tokenize.Tokenizer {
 	return c.tokenizer
 }
 
-// Returns the [CountVectorizer]s configured [stemming.Stemmer].
-func (c *CountVectorizer) Stemmer() stemming.Stemmer {
+// Returns the [CountVectorizer]s configured [stem.Stemmer].
+func (c *CountVectorizer) Stemmer() stem.Stemmer {
 	return c.stemmer
 }
 
-// Returns the [CountVectorizer]s configured [tokens.TypeCounter].
-func (c *CountVectorizer) TypeCounter() *tokens.TypeCounter {
+// Returns the [CountVectorizer]s configured [tokenize.TypeCounter].
+func (c *CountVectorizer) TypeCounter() *tokenize.TypeCounter {
 	return c.typeCounter
 }
 
@@ -111,29 +112,29 @@ func (c *CountVectorizer) Method() VectorizationMethod {
 	return c.method
 }
 
-// Vectorizes the string of text.
-func (v *CountVectorizer) Vectorize(text string) (vector Vector, err error) {
+// Vectorizes the chunk of text.
+func (v *CountVectorizer) Vectorize(chunk string) (vector vector.Vector, err error) {
 	switch v.method {
 	case VectorizeOneHot:
-		return v.VectorizeOneHot(text)
+		return v.VectorizeOneHot(chunk)
 	case VectorizeFrequency:
-		return v.VectorizeFrequency(text)
+		return v.VectorizeFrequency(chunk)
 	}
 	return nil, errors.ErrMethodNotSupported
 }
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the given
-// string of text and given vocabulary map. The vector returned has a value of
-// the count of word instances within the string for each vocabulary word index.
-func (v *CountVectorizer) VectorizeFrequency(text string) (vector Vector, err error) {
+// chunk of text and given vocabulary map. The vector returned has a value of
+// the count of word instances within the chunk for each vocabulary word index.
+func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector vector.Vector, err error) {
 	// Type count the text
 	var types map[string]int
-	if types, err = v.typeCounter.TypeCount(text); err != nil {
+	if types, err = v.typeCounter.TypeCount(chunk); err != nil {
 		return nil, err
 	}
 
 	// Create the vector from the vocabulary
-	vector = make(Vector, len(v.vocab))
+	vector = make([]float64, 0, len(v.vocab))
 	for i, word := range v.vocab {
 		// Stem the vocab word with the same stemmer as the type counter uses
 		stem := v.typeCounter.Stemmer().Stem(word)
@@ -145,13 +146,12 @@ func (v *CountVectorizer) VectorizeFrequency(text string) (vector Vector, err er
 	return vector, nil
 }
 
-// VectorizeOneHot returns a one-hot encoding vector for the given text
+// VectorizeOneHot returns a one-hot encoding vector for the given text chunk
 // and given vocabulary map. The vector returned has a value of 1 for each
-// vocabulary word index if it is present within the text and 0
-// otherwise.
-func (v *CountVectorizer) VectorizeOneHot(text string) (vector Vector, err error) {
+// vocabulary word index if it is present within the text and 0 otherwise.
+func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector vector.Vector, err error) {
 	// Get the frequency encoding
-	if vector, err = v.VectorizeFrequency(text); err != nil {
+	if vector, err = v.VectorizeFrequency(chunk); err != nil {
 		return nil, err
 	}
 
@@ -192,25 +192,25 @@ func CountVectorizerWithLang(lang enum.Language) CountVectorizerOption {
 	}
 }
 
-// CountVectorizerWithTokenizer sets the [tokens.Tokenizer] to use with the
+// CountVectorizerWithTokenizer sets the [tokenize.Tokenizer] to use with the
 // [CountVectorizer].
-func CountVectorizerWithTokenizer(tokenizer tokens.Tokenizer) CountVectorizerOption {
+func CountVectorizerWithTokenizer(tokenizer tokenize.Tokenizer) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.tokenizer = tokenizer
 	}
 }
 
-// CountVectorizerWithStemmer sets the [stemming.Stemmer] to use with the
+// CountVectorizerWithStemmer sets the [stem.Stemmer] to use with the
 // [CountVectorizer].
-func CountVectorizerWithStemmer(stemmer stemming.Stemmer) CountVectorizerOption {
+func CountVectorizerWithStemmer(stemmer stem.Stemmer) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.stemmer = stemmer
 	}
 }
 
-// CountVectorizerWithTypeCounter sets the [tokens.TypeCounter] to use with the
+// CountVectorizerWithTypeCounter sets the [tokenize.TypeCounter] to use with the
 // [CountVectorizer].
-func CountVectorizerWithTypeCounter(typecounter *tokens.TypeCounter) CountVectorizerOption {
+func CountVectorizerWithTypeCounter(typecounter *tokenize.TypeCounter) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.typeCounter = typecounter
 	}

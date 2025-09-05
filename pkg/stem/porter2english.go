@@ -1,4 +1,4 @@
-package stemming
+package stem
 
 import (
 	"slices"

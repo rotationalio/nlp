@@ -1,8 +1,9 @@
-package tokens
+package tokenize
 
 import (
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/stemming"
+	"go.rtnl.ai/nlp/pkg/stem"
+	"go.rtnl.ai/nlp/pkg/tokenlist"
 )
 
 // ############################################################################
@@ -13,11 +14,11 @@ import (
 type TypeCounter struct {
 	lang      enum.Language
 	tokenizer Tokenizer
-	stemmer   stemming.Stemmer
+	stemmer   stem.Stemmer
 }
 
 // Returns a new [TypeCounter] instance. Defaults to the default [RegexTokenizer] and
-// [stemming.Stemmer] options. Modified by passing [TypeCounterOption] functions into
+// [stem.Stemmer] options. Modified by passing [TypeCounterOption] functions into
 // relevant function calls.
 //
 // Defaults:
@@ -41,7 +42,7 @@ func NewTypeCounter(opts ...TypeCounterOption) (tc *TypeCounter, err error) {
 	}
 
 	if tc.stemmer == nil {
-		if tc.stemmer, err = stemming.NewPorter2Stemmer(tc.lang); err != nil {
+		if tc.stemmer, err = stem.NewPorter2Stemmer(tc.lang); err != nil {
 			return nil, err
 		}
 	}
@@ -59,27 +60,28 @@ func (c *TypeCounter) Tokenizer() Tokenizer {
 	return c.tokenizer
 }
 
-// Returns the [TypeCounter]s configured [stemming.Stemmer].
-func (c *TypeCounter) Stemmer() stemming.Stemmer {
+// Returns the [TypeCounter]s configured [stem.Stemmer].
+func (c *TypeCounter) Stemmer() stem.Stemmer {
 	return c.stemmer
 }
 
 // Returns a map of the types (unique word stems) and their counts for the given
 // text string.
-func (c *TypeCounter) TypeCount(text string) (types map[string]int, err error) {
+func (c *TypeCounter) TypeCount(chunk string) (types map[string]int, err error) {
 	// Tokenize
-	var tokens []string
-	if tokens, err = c.tokenizer.Tokenize(text); err != nil {
+	var tokens *tokenlist.TokenList
+	if tokens, err = c.tokenizer.Tokenize(chunk); err != nil {
 		return nil, err
 	}
 
 	// Stem
-	for i, tok := range tokens {
-		tokens[i] = c.stemmer.Stem(tok)
+	toks := tokens.Strings()
+	for i, tok := range toks {
+		toks[i] = c.stemmer.Stem(tok)
 	}
 
 	// Count
-	return c.CountTypes(tokens), nil
+	return c.CountTypes(toks), nil
 }
 
 // CountTypes returns a the count of each type (unique word) in the given token
@@ -114,8 +116,8 @@ func TypeCounterWithTokenizer(tokenizer Tokenizer) TypeCounterOption {
 	}
 }
 
-// TypeCounterWithStemmer sets the [stemming.Stemmer] to be used for a [TypeCounter].
-func TypeCounterWithStemmer(stemmer stemming.Stemmer) TypeCounterOption {
+// TypeCounterWithStemmer sets the [stem.Stemmer] to be used for a [TypeCounter].
+func TypeCounterWithStemmer(stemmer stem.Stemmer) TypeCounterOption {
 	return func(t *TypeCounter) {
 		t.stemmer = stemmer
 	}
