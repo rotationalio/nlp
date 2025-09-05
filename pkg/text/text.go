@@ -1,6 +1,8 @@
 package text
 
 import (
+	"unicode/utf8"
+
 	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/token"
@@ -14,20 +16,42 @@ type Text struct {
 	// The string representation of the text.
 	text string
 
-	// The tokens of this text; lazily initialized.
-	tokens *tokenlist.TokenList
-
-	// The stem tokens of this text; lazily initialized.
-	stems *tokenlist.TokenList
+	// ========================
+	// Options
+	// ========================
 
 	// The [enum.Language] of this text.
 	lang enum.Language
 
-	// The [stemming.Stemmer] to use for stemming this text's tokens.
+	// The [stem.Stemmer] to use for stemming this text's tokens.
 	stemmer stem.Stemmer
 
-	// The [tokens.Tokenizer] to use for tokenizing this text.
+	// The [tokenize.Tokenizer] to use for tokenizing this text.
 	tokenizer tokenize.Tokenizer
+
+	// The [tokenize.TypeCounter] to use for tokenizing this text.
+	counter *tokenize.TypeCounter
+
+	// ========================
+	// Standard Tools
+	// ========================
+
+	//TODO FrequencyVectorizer
+
+	//TODO CosineSimilarizer
+
+	// ========================
+	// Caching
+	// ========================
+
+	// Cache of tokens of this text; lazily initialized.
+	tokens *tokenlist.TokenList
+
+	// Cache of stem tokens of this text; lazily initialized.
+	stems *tokenlist.TokenList
+
+	// Cache of type count of this text; lazily initialized.
+	typecount map[string]int
 }
 
 // Create a new [Text] from the input string with the specified [Option]s.
@@ -68,12 +92,27 @@ func New(t string, options ...Option) (text *Text, err error) {
 		)
 	}
 
+	// Default type counter
+	if text.counter == nil {
+		if text.counter, err = tokenize.NewTypeCounter(
+			tokenize.TypeCounterWithLanguage(text.lang),
+			tokenize.TypeCounterWithStemmer(text.stemmer),
+			tokenize.TypeCounterWithTokenizer(text.tokenizer),
+		); err != nil {
+			return nil, err
+		}
+	}
+
+	//TODO init the FrequencyVectorizer
+
+	//TODO init the CosineSimilarizer
+
 	return text, nil
 }
 
-// Returns a [tokenize.TokenList] for the [Text]s tokens using the configured
-// [tokenize.Tokenizer]. This function will tokenize the text on it's first call,
-// then cache the tokens for future calls.
+// Returns a [tokenlist.TokenList] for the [Text]s tokens using the configured
+// [tokenize.Tokenizer]. This function cache the result of the operation for
+// subsequent calls.
 func (t *Text) Tokens() (tokens *tokenlist.TokenList, err error) {
 	if t.tokens == nil {
 		if t.tokens, err = t.tokenizer.Tokenize(t.text); err != nil {
@@ -83,10 +122,9 @@ func (t *Text) Tokens() (tokens *tokenlist.TokenList, err error) {
 	return t.tokens, nil
 }
 
-// Returns a [tokenize.TokenList] for the [Text]s token stems using the configured
-// [stem.Stemmer]. This function will stem the tokens on it's first call,
-// then cache the stems for future calls. If the text has not been tokenized,
-// then it will also be tokenized and cached on the first call.
+// Returns a [tokenlist.TokenList] for the [Text]s stems using the configured
+// [stem.Stemmer]. This function cache the result of the operation for
+// subsequent calls.
 func (t *Text) Stems() (stems *tokenlist.TokenList, err error) {
 	if t.stems == nil {
 		// Initialize the stems with the tokens
@@ -100,21 +138,63 @@ func (t *Text) Stems() (stems *tokenlist.TokenList, err error) {
 	return t.stems, nil
 }
 
-// TODO func (t *Text) Types() *TokenList { return t.Stems() }
-// TODO func (t *Text) Len() int {}
-// TODO func (t *Text) Runes() []rune {}
-// TODO func (t *Text) TokenCount() map[Token]int {}
-// TODO func (t *Text) TypeCount() map[Token]int {}
-// TODO func (t *Text) CountVectorize() vector.Vector {}
+// Returns a map of the types (unique word stems) and their counts for this
+// [Text]. This function cache the result of the operation for subsequent calls.
+func (t *Text) TypeCount() (types map[string]int, err error) {
+	if t.typecount == nil {
+		// Stem the words
+		var stems *tokenlist.TokenList
+		if stems, err = t.Stems(); err != nil {
+			return nil, err
+		}
+		// Count the stems to get the type count
+		t.typecount = t.counter.CountTypes(stems.Strings())
+	}
+	return t.typecount, nil
+}
+
+// TODO func (t *Text) VectorizeOneHot() vector.Vector {}
+
+// TODO func (t *Text) VectorizeFrequency() vector.Vector {}
+
 // TODO func (t *Text) CosineSimilarity(other *Text) float64 {}
+
+// ###########################################################################
+// Properties
+// ###########################################################################
+
+// Returns the number of UTF-8 runes (aka: characters) in the [Text].
+func (t *Text) Len() int {
+	return utf8.RuneCountInString(t.text)
+}
+
+// Returns the number of bytes in the [Text] (like `len(aString)`).
+func (t *Text) ByteLen() int {
+	return len(t.text)
+}
 
 // ###########################################################################
 // Getters
 // ###########################################################################
 
-// Returns the string that this text was created with.
+// Returns the [Text] as a string.
 func (t *Text) Text() string {
 	return t.text
+}
+
+// Returns the [Text] as a string.
+func (t *Text) String() string {
+	return t.text
+}
+
+// Returns the [Text] as a slice of runes.
+func (t *Text) Runes() []rune {
+	return []rune(t.text)
+}
+
+// Returns the [Text] as a slice of bytes.
+func (t *Text) Bytes() []byte {
+	return []byte(t.text)
 }
 
 // Returns the [enum.Language] configured on this [Text].
@@ -131,3 +211,7 @@ func (t *Text) Stemmer() stem.Stemmer {
 func (t *Text) Tokenizer() tokenize.Tokenizer {
 	return t.tokenizer
 }
+
+//TODO get the FrequencyVectorizer
+
+//TODO get the CosineSimilarizer

@@ -65,8 +65,7 @@ func (c *TypeCounter) Stemmer() stem.Stemmer {
 	return c.stemmer
 }
 
-// Returns a map of the types (unique word stems) and their counts for the given
-// text string.
+// Returns a map of the types (unique words) and their counts for the string.
 func (c *TypeCounter) TypeCount(chunk string) (types map[string]int, err error) {
 	// Tokenize
 	var tokens *tokenlist.TokenList
