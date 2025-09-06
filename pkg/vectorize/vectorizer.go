@@ -128,22 +128,9 @@ func (v *CountVectorizer) Vectorize(chunk string) (vector vector.Vector, err err
 	return nil, errors.ErrMethodNotSupported
 }
 
-// Vectorizes the chunk of text using the given vocabulary and the
-// pre-configured [VectorizationMethod].
-func (v *CountVectorizer) VectorizeWithVocab(chunk string, vocab []string) (vector vector.Vector, err error) {
-	switch v.method {
-	case VectorizeOneHot:
-		return v.VectorizeOneHot(chunk, vocab)
-	case VectorizeFrequency:
-		return v.VectorizeFrequency(chunk, vocab)
-	}
-	return nil, errors.ErrMethodNotSupported
-}
-
 // VectorizeFrequency returns a frequency (count) encoding vector for the given
 // chunk of text and given vocabulary. The vector returned has a value of
 // the count of word instances within the chunk for each vocabulary word index.
-// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
 func (v *CountVectorizer) VectorizeFrequency(chunk string, vocab []string) (vector vector.Vector, err error) {
 	// Type count the text
 	var types map[string]int
@@ -167,7 +154,6 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string, vocab []string) (vect
 // VectorizeOneHot returns a one-hot encoding vector for the given text chunk
 // and given vocabulary. The vector returned has a value of 1 for each
 // vocabulary word index if it is present within the text and 0 otherwise.
-// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
 func (v *CountVectorizer) VectorizeOneHot(chunk string, vocab []string) (vector vector.Vector, err error) {
 	// Get the frequency encoding
 	if vector, err = v.VectorizeFrequency(chunk, vocab); err != nil {
@@ -205,7 +191,6 @@ type CountVectorizerOption func(c *CountVectorizer)
 
 // CountVectorizerWithLang sets the vocabulary to use with the
 // [CountVectorizer].
-// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
 func CountVectorizerWithVocab(vocab []string) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.vocab = vocab

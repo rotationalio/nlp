@@ -116,7 +116,6 @@ func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err err
 type CosineSimilarizerOption func(s *CosineSimilarizer)
 
 // Returns a function which sets a [CosineSimilarizer]s vocabulary.
-// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
 func CosineSimilarizerWithVocab(vocab []string) CosineSimilarizerOption {
 	return func(s *CosineSimilarizer) {
 		s.vocab = vocab

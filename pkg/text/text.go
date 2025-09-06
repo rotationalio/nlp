@@ -57,6 +57,9 @@ type Text struct {
 
 	// Cache of type count of this text; lazily initialized.
 	typecount map[string]int
+
+	// Cache for the vocabulary to use when using the countVectorizer
+	vocab []string
 }
 
 // Create a new [Text] from the input string with the specified [Option]s.
@@ -181,21 +184,29 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 // VectorizeFrequency returns a frequency (count) encoding vector for the [Text]
 // and vocabulary. The vector returned has a value of the count of word
 // instances within the chunk for each vocabulary word index.
-// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
-func (t *Text) VectorizeFrequency(vocab []string) (vector.Vector, error) {
-	return t.countVectorizer.VectorizeFrequency(t.text, vocab)
+// NOTE: You must set the vocabulary on the [Text] using [WithVocabulary] during
+// creation or an error will be returned.
+func (t *Text) VectorizeFrequency() (vector.Vector, error) {
+	return t.countVectorizer.VectorizeFrequency(t.text, t.vocab)
 }
 
-// VectorizeFrequency returns a frequency (count) encoding vector for the [Text]
-// and vocabulary. The vector returned has a value of 1 for each vocabulary
+// VectorizeOneHot returns a one-hot encoding vector for the [Text] and
+// vocabulary. The vector returned has a value of 1 for each vocabulary
 // word index if it is present within the text and 0 otherwise.
-// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
-func (t *Text) VectorizeOneHot(vocab []string) (vector.Vector, error) {
-	return t.countVectorizer.VectorizeOneHot(t.text, vocab)
+// NOTE: You must set the vocabulary on the [Text] using [WithVocabulary] during
+// creation or an error will be returned.
+func (t *Text) VectorizeOneHot() (vector.Vector, error) {
+	return t.countVectorizer.VectorizeOneHot(t.text, t.vocab)
 }
 
-// FIXME: we have a vocabulary problem :(
-//TODO func (t *Text) CosineSimilarity(other *Text) float64 {}
+// Retruns a value in the range [-1.0, 1.0] that indicates if two [Text] are
+// similar using the cosine similarity method.
+// NOTE: If using the [vectorize.CountVectorizer], you must set the vocabulary
+// on the [Text] using [WithVocabulary] during creation or an error will be
+// returned.
+func (t *Text) CosineSimilarity(other *Text) (similarity float64, err error) {
+	return t.cosineSimilarizer.Similarity(t.text, other.text)
+}
 
 // ###########################################################################
 // Properties

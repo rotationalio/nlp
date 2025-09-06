@@ -9,6 +9,13 @@ import (
 // An [Option] configures a [Text] in [New].
 type Option func(text *Text)
 
+// Returns a function that sets the vocabulary on a [Text].
+func WithVocabulary(vocab []string) Option {
+	return func(text *Text) {
+		text.vocab = vocab
+	}
+}
+
 // Returns a function that sets the [enum.Language] on a [Text].
 func WithLanguage(lang enum.Language) Option {
 	return func(text *Text) {
