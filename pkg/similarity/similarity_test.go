@@ -112,7 +112,9 @@ func TestCosineSimilarity(t *testing.T) {
 
 	// setup
 	vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-	similarizer, err := similarity.NewCosineSimilarizer(similarity.CosineSimilarizerWithVocab(vocab))
+	similarizer, err := similarity.NewCosineSimilarizer(
+		similarity.CosineSimilarizerWithVocab(vocab),
+	)
 	require.NoError(t, err)
 	require.NotNil(t, similarizer)
 

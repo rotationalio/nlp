@@ -55,7 +55,10 @@ func NewCosineSimilarizer(opts ...CosineSimilarizerOption) (similarizer *CosineS
 	}
 
 	if similarizer.vectorizer == nil {
-		if similarizer.vectorizer, err = vectorize.NewCountVectorizer(vectorize.CountVectorizerWithLang(similarizer.lang)); err != nil {
+		if similarizer.vectorizer, err = vectorize.NewCountVectorizer(
+			vectorize.CountVectorizerWithVocab(similarizer.vocab),
+			vectorize.CountVectorizerWithLang(similarizer.lang),
+		); err != nil {
 			return nil, err
 		}
 	}
