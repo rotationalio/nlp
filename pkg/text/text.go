@@ -194,7 +194,7 @@ func (t *Text) VectorizeOneHot(vocab []string) (vector.Vector, error) {
 	return t.countVectorizer.VectorizeOneHot(t.text, vocab)
 }
 
-// FIXME: we have a vocabulary problem :()
+// FIXME: we have a vocabulary problem :(
 //TODO func (t *Text) CosineSimilarity(other *Text) float64 {}
 
 // ###########################################################################
