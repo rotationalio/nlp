@@ -1,3 +1,20 @@
+/*
+[Token] is used for word tokens, word stem tokens, etc.
+
+Usage example:
+
+	// Create a new [Token]
+	token := token.New("aardvarks") // Token
+
+	// Get the token as other types
+	stringToken := token.String() // string
+	runeToken := token.Runes() // []rune
+	byteToken := token.Bytes() // []byte
+
+	// Get the number of runes and bytes in a token
+	runeCount := token.Len() // 9 for "aadrdvarks"
+	byteCount := token.ByteLen() // acts like the len() function
+*/
 package token
 
 import (

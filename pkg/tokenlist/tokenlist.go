@@ -1,3 +1,25 @@
+/*
+[TokenList] is a list of [token.Token]s with useful features.
+
+Usage:
+
+	// Create a new [TokenList] from a slice of strings
+	myTokens := tokenlist.New([]string{"apple", "bananna", "zebra"})
+
+	// Get the tokens as a slice of [token.Token]
+	tokens := myTokens.Tokens() // []Token
+
+	// You can get a slice of strings instead of tokens
+	stringTokens := myTokens.Strings() // []string
+
+	// You can get a new [TokenList] as a copy of another list
+	aCopy := tokenlist.NewCopy(myTokens) // TokenList (copy of myTokens)
+
+	// You can get an empty [TokenList] with a specific size and capacity
+	emptyTokens := tokenlist.Empty(0, 100) // TokenList (with no entries)
+	emptyTokens := tokenlist.Empty(10, 100) // TokenList (with 10 null string tokens)
+	emptyTokens := tokenlist.Empty(10, 5) // TokenList (capacity will be set to 10)
+*/
 package tokenlist
 
 import (
@@ -30,10 +52,14 @@ func NewCopy(other *TokenList) *TokenList {
 	return tl
 }
 
-// Returns a new [TokenList] that is empty with a specific capacity.
-func NewEmpty(capacity int) *TokenList {
+// Returns a new [TokenList] that is empty with a specific size and capacity. If
+// capacity is smaller than size, then size will be used as the capacity.
+func NewEmpty(size, capacity int) *TokenList {
+	if capacity < size {
+		capacity = size
+	}
 	return &TokenList{
-		tokens: make([]token.Token, 0, capacity),
+		tokens: make([]token.Token, size, capacity),
 	}
 }
 

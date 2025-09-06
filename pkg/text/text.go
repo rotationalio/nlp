@@ -1,3 +1,57 @@
+/*
+[Text] is a one-stop shop for performing NLP operations on text.
+
+Usage example:
+
+	// Create a [Text] with the default settings
+	myText := text.New("apple aardvarks zebra bananna aardvark")
+
+	// Get all of the word tokens (ignoring errors in this example)
+	myTokens, _ := myText.Tokens() // TokenList
+
+	// Get all word stem tokens which use the same underlying types as the full
+	// word tokens above (ignoring errors in this example)
+	myStems, _ := myText.Stems() // TokenList
+
+	// The stems are 1:1 count with the tokens
+	if myTokens.Len() != myStems.Len() { // 5 == 5
+		panic("this should never occur")
+	}
+
+	// You can also get a type count, which returns the count of each unique
+	// word stem (ignoring errors) ("aardvark" has a 2 count for this example)
+	myCount, _ := myText.TypeCount() // map[string]int
+
+	// These are a [tokenlist.TokenList], but if you need a slice of strings...
+	stringTokens := myTokens.Strings() // []string
+
+	// Or to get the tokens as a slice of [token.Token] instead
+	tokenSlice := myTokens.Tokens() // []Token
+
+	// Get an individual token
+	firstToken := tokenSlice[0] // Token
+
+	// You can also get a token as another type
+	stringToken := firstToken.String() // string
+	runeToken := firstToken.Runes()    // []rune
+	byteToken := firstToken.Bytes()    // []byte
+
+	// For these examples, we need to re-create the [Text] with a vocabulary,
+	// so the [vectorize.CountVectorizer] will work without an error to get
+	// cosine similarity.
+	myText := text.New(
+	    "cars have engines",
+	    text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+	)
+	otherText, _ := text.New("engines go with transmissions") // no need vocab
+
+	// Cosine similarity with another string
+	similarity, _ := myText.CosineSimilarity() // float64 in range [-1.0, 1.0]
+
+	// We can also get a one-hot or frequency vectorization of our text
+	myOneHotVector, _ := myText.VectorizeOneHot()
+	myFrequencyVector, _ := myText.VectorizeFrequency()
+*/
 package text
 
 import (
@@ -65,9 +119,10 @@ type Text struct {
 // Create a new [Text] from the input string with the specified [Option]s.
 //
 // Defaults:
-// * Language: [enum.LanguageEnglish]
-// * Stemmer: [stem.Porter2Stemmer]
-// * Tokenizer: [tokenize.RegexTokenizer]
+//   - Vocabulary (use [WithVocabulary]): nil (errors will be returned from certain functions if a vocabulary is not added)
+//   - Language (use [WithLanguage]): [enum.LanguageEnglish]
+//   - Stemmer (use [WithStemmer]): [stem.Porter2Stemmer]
+//   - Tokenizer (use [WithTokenizer]): [tokenize.RegexTokenizer]
 func New(t string, options ...Option) (text *Text, err error) {
 	// Initialize text
 	text = &Text{
