@@ -1,4 +1,4 @@
-package stemming_test
+package stem_test
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/stemming"
+	"go.rtnl.ai/nlp/pkg/stem"
 )
 
 // ############################################################################
@@ -19,13 +19,13 @@ import (
 func TestStemmers(t *testing.T) {
 	testcases := []struct {
 		TestName     string
-		Stemmer      stemming.Stemmer
+		Stemmer      stem.Stemmer
 		InputPath    string
 		ExpectedPath string
 	}{
 		{
 			TestName:     "NoOpStemmer",
-			Stemmer:      &stemming.NoOpStemmer{},
+			Stemmer:      &stem.NoOpStemmer{},
 			InputPath:    "testdata/Porter2Stemmer/voc.txt", // uses Porter2 inputs
 			ExpectedPath: "testdata/Porter2Stemmer/voc.txt", // no-op -> same as input
 		},
@@ -81,9 +81,9 @@ func TestStemmers(t *testing.T) {
 
 // Returns a new [quant.Porter2Stemmer] which supports the [quant.Language]
 // given or panics on an error.
-func mustNewPorter2Stemmer(lang enum.Language) (stemmer *stemming.Porter2Stemmer) {
+func mustNewPorter2Stemmer(lang enum.Language) (stemmer *stem.Porter2Stemmer) {
 	var err error
-	if stemmer, err = stemming.NewPorter2Stemmer(lang); err != nil {
+	if stemmer, err = stem.NewPorter2Stemmer(lang); err != nil {
 		panic(err)
 	}
 	return stemmer

@@ -1,4 +1,4 @@
-package stemming
+package stem
 
 import (
 	"go.rtnl.ai/nlp/pkg/enum"

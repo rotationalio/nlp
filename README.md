@@ -3,6 +3,7 @@
 Natural Language Processing in Golang.
 
 GitHub: <https://github.com/rotationalio/nlp>
+Go Docs: <https://go.rtnl.ai/nlp>
 
 ## The Vision
 
@@ -28,13 +29,12 @@ We want this package to be:
 
 ## End-User API Usage
 
-TODO (sc-34050): Rewrite this section when the "Text/Blob" refactoring is complete in sc-34050
+There are two ways you can use this library:
 
-Generally, if we have an `Operation` that we want to perform on text, there will be an associated `Operation[izer|er]` type.
-The `Operation[izer|er]` may be an `interface` in the cases where we might want more than one implementation of the `Operation`, such as with the `Stemmer` interface where we have a `Porter2Stemmer` implementation.
-The `Operation[izer|er]` may alternately be a `struct` in the cases where we only need one implementation of the `Operation`, such as with the `TypeCounter` struct which does not need additional implementations.
-Each of the `Operation[izer|er]` types will have a `NewOperation[izer|er](opts ...Operation[izer|er]Option)` which allows the user to either take the default configuration of the new instance, or they can include a variable number of arguments which can modify the options for the `Operation[izer|er]` instance returned.
-Please see the documentation comments within the code for more information on how to use this library, and if anything is unclear please contact us to clarify!
+1) Use the unified `text.Text` interface to perform all of the possible NLP operations using a single object that is configured with the specific tools you wish to use when it is created via `text.New(chunk string) *text.Text`. This also includes using the `token.Token` and `tokenlist.TokenList` types which have their own features.
+2) Use the various tools in the lower level packages such as the `stem` or the `tokenize` packages on an as-needed basis. These tools use basic Go types such as strings, ints, floats, and slices of basic Go types, rather than the `token.Token` or other NLP library types.
+
+See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
 
 ## Features, metrics, and tools
 

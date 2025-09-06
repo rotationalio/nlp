@@ -1,4 +1,4 @@
-package tokens
+package tokenize
 
 import (
 	"regexp"
@@ -11,7 +11,7 @@ import (
 // ############################################################################
 
 type Tokenizer interface {
-	Tokenize(text string) (tokens []string, err error)
+	Tokenize(chunk string) (tokens []string, err error)
 }
 
 // ############################################################################
@@ -73,7 +73,7 @@ func (t *RegexTokenizer) Regex() string {
 }
 
 // Tokenizes a text string using [regexp.Regexp.FindAllString].
-func (t *RegexTokenizer) Tokenize(text string) (tokens []string, err error) {
+func (t *RegexTokenizer) Tokenize(chunk string) (tokens []string, err error) {
 	// Compile regexp
 	var r *regexp.Regexp
 	if r, err = regexp.Compile(t.regex); err != nil {
@@ -81,7 +81,7 @@ func (t *RegexTokenizer) Tokenize(text string) (tokens []string, err error) {
 	}
 
 	// Tokenize with regex
-	tokens = r.FindAllString(text, -1)
+	tokens = r.FindAllString(chunk, -1)
 
 	return tokens, nil
 }

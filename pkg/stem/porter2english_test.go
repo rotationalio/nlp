@@ -1,4 +1,4 @@
-package stemming_test
+package stem_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/stemming"
+	"go.rtnl.ai/nlp/pkg/stem"
 )
 
 // NOTE: Full stemming tests implemented in [TestStemmers] in 'stemmers_test.go'
@@ -14,7 +14,7 @@ import (
 // Ensure that if the user bypasses setting the [quant.Language] in the
 // [quant.Porter2Stemmer] that [quant.Porter2Stemmer.StemEnglish] still works.
 func TestPorter2EnglishBypass(t *testing.T) {
-	stemmer := &stemming.Porter2Stemmer{} // no 'lang' set
+	stemmer := &stem.Porter2Stemmer{} // no 'lang' set
 	in := "seaweed"
 	exp := "seawe"
 	act := stemmer.StemEnglish(in)
