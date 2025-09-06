@@ -48,7 +48,7 @@ func NewCopy(other *TokenList) *TokenList {
 	tl := &TokenList{
 		tokens: make([]token.Token, 0, len(other.tokens)),
 	}
-	copy(tl.tokens, other.tokens)
+	tl.tokens = append(tl.tokens, other.tokens...)
 	return tl
 }
 

@@ -43,7 +43,10 @@ Usage example:
 	    "cars have engines",
 	    text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
 	)
-	otherText, _ := text.New("engines go with transmissions") // no need vocab
+	otherText, _ := text.New(
+		"engines go with transmissions",
+	    text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+	)
 
 	// Cosine similarity with another string
 	similarity, _ := myText.CosineSimilarity() // float64 in range [-1.0, 1.0]
@@ -153,6 +156,7 @@ func New(t string, options ...Option) (text *Text, err error) {
 
 	// Initialize the [vectorize.CountVectorizer]
 	if text.countVectorizer, err = vectorize.NewCountVectorizer(
+		vectorize.CountVectorizerWithVocab(text.vocab),
 		vectorize.CountVectorizerWithLang(text.lang),
 		vectorize.CountVectorizerWithTokenizer(text.tokenizer),
 		vectorize.CountVectorizerWithStemmer(text.stemmer),
@@ -163,6 +167,7 @@ func New(t string, options ...Option) (text *Text, err error) {
 
 	// Initialize the [similarity.CosineSimilarizer]
 	if text.cosineSimilarizer, err = similarity.NewCosineSimilarizer(
+		similarity.CosineSimilarizerWithVocab(text.vocab),
 		similarity.CosineSimilarizerWithLanguage(text.lang),
 		similarity.CosineSimilarizerWithTokenizer(text.tokenizer),
 		similarity.CosineSimilarizerWithVectorizer(text.countVectorizer),
@@ -221,6 +226,21 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 		t.typecount = t.typeCounter.CountTypes(stems.Strings())
 	}
 	return t.typecount, nil
+}
+
+// Returns the raw cache value for this [Text]s tokens.
+func (t *Text) TokensCache() (tokens *tokenlist.TokenList) {
+	return t.tokens
+}
+
+// Returns the raw cache value for this [Text]s stems.
+func (t *Text) StemsCache() (stems *tokenlist.TokenList) {
+	return t.stems
+}
+
+// Returns the raw cache value for this [Text]s type count.
+func (t *Text) TypeCountCache() (types map[string]int) {
+	return t.typecount
 }
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the [Text]
