@@ -86,7 +86,7 @@ type Text struct {
 	// Standard Tools
 	// ==============================
 
-	counter           *tokenize.TypeCounter
+	typeCounter       *tokenize.TypeCounter
 	countVectorizer   *vectorize.CountVectorizer
 	cosineSimilarizer *similarity.CosineSimilarizer
 
@@ -141,8 +141,8 @@ func New(t string, options ...Option) (text *Text, err error) {
 	// STANDARD TOOLS
 
 	// Initialize the [tokenize.TypeCounter]
-	if text.counter == nil {
-		if text.counter, err = tokenize.NewTypeCounter(
+	if text.typeCounter == nil {
+		if text.typeCounter, err = tokenize.NewTypeCounter(
 			tokenize.TypeCounterWithLanguage(text.lang),
 			tokenize.TypeCounterWithStemmer(text.stemmer),
 			tokenize.TypeCounterWithTokenizer(text.tokenizer),
@@ -156,7 +156,7 @@ func New(t string, options ...Option) (text *Text, err error) {
 		vectorize.CountVectorizerWithLang(text.lang),
 		vectorize.CountVectorizerWithTokenizer(text.tokenizer),
 		vectorize.CountVectorizerWithStemmer(text.stemmer),
-		vectorize.CountVectorizerWithTypeCounter(text.counter),
+		vectorize.CountVectorizerWithTypeCounter(text.typeCounter),
 	); err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 		}
 
 		// Count the stems to get the type count
-		t.typecount = t.counter.CountTypes(stems.Strings())
+		t.typecount = t.typeCounter.CountTypes(stems.Strings())
 	}
 	return t.typecount, nil
 }
@@ -311,6 +311,11 @@ func (t *Text) Tokenizer() tokenize.Tokenizer {
 // Returns the [vectorize.CountVectorizer] configured on this [Text].
 func (t *Text) CountVectorizer() *vectorize.CountVectorizer {
 	return t.countVectorizer
+}
+
+// Returns the [tokenize.TypeCounter] configured on this [Text].
+func (t *Text) TypeCounter() *tokenize.TypeCounter {
+	return t.typeCounter
 }
 
 // Returns the [similarity.CosineSimilarizer] configured on this [Text].
