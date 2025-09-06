@@ -13,20 +13,30 @@ import (
 
 func TestNewCountVectorizer(t *testing.T) {
 	t.Run("SuccessDefaults", func(t *testing.T) {
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-		vectorizer, err := vectorize.NewCountVectorizer(vocab)
+		vectorizer, err := vectorize.NewCountVectorizer()
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 	})
 
+	t.Run("SuccessVocabOption", func(t *testing.T) {
+		//setup
+		vocab := []string{"one", "two", "three"}
+		vocabOpt := vectorize.CountVectorizerWithVocab(vocab)
+
+		//test
+		vectorizer, err := vectorize.NewCountVectorizer(vocabOpt)
+		require.NoError(t, err)
+		require.NotNil(t, vectorizer)
+		require.Equal(t, vocab, vectorizer.Vocab())
+	})
+
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
 		lang := enum.LanguageEnglish
 		langOpt := vectorize.CountVectorizerWithLang(lang)
 
 		//test
-		vectorizer, err := vectorize.NewCountVectorizer(vocab, langOpt)
+		vectorizer, err := vectorize.NewCountVectorizer(langOpt)
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 		require.Equal(t, lang, vectorizer.Language())
@@ -34,12 +44,11 @@ func TestNewCountVectorizer(t *testing.T) {
 
 	t.Run("SuccessTokenizerOption_RegexTokenizer", func(t *testing.T) {
 		//setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
 		tokenizer := tokenize.NewRegexTokenizer()
 		tokOpt := vectorize.CountVectorizerWithTokenizer(tokenizer)
 
 		//test
-		vectorizer, err := vectorize.NewCountVectorizer(vocab, tokOpt)
+		vectorizer, err := vectorize.NewCountVectorizer(tokOpt)
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 		require.Equal(t, tokenizer, vectorizer.Tokenizer())
@@ -47,13 +56,12 @@ func TestNewCountVectorizer(t *testing.T) {
 
 	t.Run("SuccessStemmerOption_Porter2Stemmer", func(t *testing.T) {
 		//setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
 		stemmer, err := stem.NewPorter2Stemmer(enum.LanguageEnglish)
 		require.NoError(t, err)
 		stemOpt := vectorize.CountVectorizerWithStemmer(stemmer)
 
 		//test
-		vectorizer, err := vectorize.NewCountVectorizer(vocab, stemOpt)
+		vectorizer, err := vectorize.NewCountVectorizer(stemOpt)
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 		require.Equal(t, stemmer, vectorizer.Stemmer())
@@ -61,13 +69,12 @@ func TestNewCountVectorizer(t *testing.T) {
 
 	t.Run("SuccessTypeCounterOption_TypeCounter", func(t *testing.T) {
 		//setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
 		typecounter, err := tokenize.NewTypeCounter()
 		require.NoError(t, err)
 		tcOpt := vectorize.CountVectorizerWithTypeCounter(typecounter)
 
 		//test
-		vectorizer, err := vectorize.NewCountVectorizer(vocab, tcOpt)
+		vectorizer, err := vectorize.NewCountVectorizer(tcOpt)
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 		require.Equal(t, typecounter, vectorizer.TypeCounter())
@@ -75,12 +82,11 @@ func TestNewCountVectorizer(t *testing.T) {
 
 	t.Run("SuccessMethodOption_Frequency", func(t *testing.T) {
 		//setup
-		vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
 		method := vectorize.VectorizeFrequency
 		methodOpt := vectorize.CountVectorizerWithMethod(method)
 
 		//test
-		vectorizer, err := vectorize.NewCountVectorizer(vocab, methodOpt)
+		vectorizer, err := vectorize.NewCountVectorizer(methodOpt)
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 		require.Equal(t, method, vectorizer.Method())
@@ -164,8 +170,12 @@ func TestCountVectorizerVectorize(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
+
 		//setup
-		vectorizer, err := vectorize.NewCountVectorizer(tc.Vocab, vectorize.CountVectorizerWithMethod(tc.Method))
+		vectorizer, err := vectorize.NewCountVectorizer(
+			vectorize.CountVectorizerWithMethod(tc.Method),
+			vectorize.CountVectorizerWithVocab(tc.Vocab),
+		)
 		require.NoError(t, err)
 		require.NotNil(t, vectorizer)
 

@@ -34,20 +34,18 @@ type CountVectorizer struct {
 // Returns a new [CountVectorizer] instance.
 //
 // Defaults:
-//   - Lang: [LanguageEnglish]
-//   - Tokenizer: [RegexTokenizer] using Lang above and it's own defaults
-//   - Stemmer: [Porter2Stemmer] using Lang above and it's own defaults
-//   - TypeCounter: [TypeCounter] using Lang, Stemmer, and Tokenizer above
+//   - Vocab: nil
+//   - Lang: [enum.LanguageEnglish]
+//   - Tokenizer: [tokenize.RegexTokenizer]
+//   - Stemmer: [stem.Porter2Stemmer]
+//   - TypeCounter: [tokenize.TypeCounter]
 //   - Method: [VectorizeOneHot]
-func NewCountVectorizer(vocab []string, opts ...CountVectorizerOption) (vectorizer *CountVectorizer, err error) {
+func NewCountVectorizer(opts ...CountVectorizerOption) (vectorizer *CountVectorizer, err error) {
 	// Set options
 	vectorizer = &CountVectorizer{}
 	for _, fn := range opts {
 		fn(vectorizer)
 	}
-
-	// Set vocab (a required option)
-	vectorizer.vocab = vocab
 
 	// Set defaults
 
@@ -112,21 +110,41 @@ func (c *CountVectorizer) Method() VectorizationMethod {
 	return c.method
 }
 
-// Vectorizes the chunk of text.
+// Vectorizes the chunk of text using the pre-configured vocabulary and
+// [VectorizationMethod].
 func (v *CountVectorizer) Vectorize(chunk string) (vector vector.Vector, err error) {
+	// We need to have set a vocabulary if we wish to use this function
+	if v.vocab == nil {
+		return nil, errors.ErrVocabularyNotSet
+	}
+
+	// Call the method function
 	switch v.method {
 	case VectorizeOneHot:
-		return v.VectorizeOneHot(chunk)
+		return v.VectorizeOneHot(chunk, v.vocab)
 	case VectorizeFrequency:
-		return v.VectorizeFrequency(chunk)
+		return v.VectorizeFrequency(chunk, v.vocab)
+	}
+	return nil, errors.ErrMethodNotSupported
+}
+
+// Vectorizes the chunk of text using the given vocabulary and the
+// pre-configured [VectorizationMethod].
+func (v *CountVectorizer) VectorizeWithVocab(chunk string, vocab []string) (vector vector.Vector, err error) {
+	switch v.method {
+	case VectorizeOneHot:
+		return v.VectorizeOneHot(chunk, vocab)
+	case VectorizeFrequency:
+		return v.VectorizeFrequency(chunk, vocab)
 	}
 	return nil, errors.ErrMethodNotSupported
 }
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the given
-// chunk of text and given vocabulary map. The vector returned has a value of
+// chunk of text and given vocabulary. The vector returned has a value of
 // the count of word instances within the chunk for each vocabulary word index.
-func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector vector.Vector, err error) {
+// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
+func (v *CountVectorizer) VectorizeFrequency(chunk string, vocab []string) (vector vector.Vector, err error) {
 	// Type count the text
 	var types map[string]int
 	if types, err = v.typeCounter.TypeCount(chunk); err != nil {
@@ -134,8 +152,8 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector vector.Vector
 	}
 
 	// Create the vector from the vocabulary
-	vector = make([]float64, len(v.vocab))
-	for i, word := range v.vocab {
+	vector = make([]float64, len(vocab))
+	for i, word := range vocab {
 		// Stem the vocab word with the same stemmer as the type counter uses
 		stem := v.typeCounter.Stemmer().Stem(word)
 		if count, ok := types[stem]; ok {
@@ -147,11 +165,12 @@ func (v *CountVectorizer) VectorizeFrequency(chunk string) (vector vector.Vector
 }
 
 // VectorizeOneHot returns a one-hot encoding vector for the given text chunk
-// and given vocabulary map. The vector returned has a value of 1 for each
+// and given vocabulary. The vector returned has a value of 1 for each
 // vocabulary word index if it is present within the text and 0 otherwise.
-func (v *CountVectorizer) VectorizeOneHot(chunk string) (vector vector.Vector, err error) {
+// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
+func (v *CountVectorizer) VectorizeOneHot(chunk string, vocab []string) (vector vector.Vector, err error) {
 	// Get the frequency encoding
-	if vector, err = v.VectorizeFrequency(chunk); err != nil {
+	if vector, err = v.VectorizeFrequency(chunk, vocab); err != nil {
 		return nil, err
 	}
 
@@ -183,6 +202,15 @@ const (
 
 // TypeCounterOption functions modify a [CountVectorizer].
 type CountVectorizerOption func(c *CountVectorizer)
+
+// CountVectorizerWithLang sets the vocabulary to use with the
+// [CountVectorizer].
+// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
+func CountVectorizerWithVocab(vocab []string) CountVectorizerOption {
+	return func(c *CountVectorizer) {
+		c.vocab = vocab
+	}
+}
 
 // CountVectorizerWithLang sets the [enum.Language] to use with the
 // [CountVectorizer].

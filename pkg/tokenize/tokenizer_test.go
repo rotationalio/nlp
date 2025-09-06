@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/tokenize"
-	"go.rtnl.ai/nlp/pkg/tokenlist"
 )
 
 func TestNewRegexTokenizer(t *testing.T) {
@@ -137,7 +136,7 @@ func TestRegexTokenizer(t *testing.T) {
 			tokens, err := tokenizer.Tokenize(tc.Text)
 			require.NoError(t, err)
 			require.NotNil(t, tokens)
-			require.Equal(t, tokenlist.New(tc.Expected), tokens)
+			require.Equal(t, tc.Expected, tokens)
 		})
 	}
 }

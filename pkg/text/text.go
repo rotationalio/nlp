@@ -4,10 +4,13 @@ import (
 	"unicode/utf8"
 
 	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/similarity"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/token"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 	"go.rtnl.ai/nlp/pkg/tokenlist"
+	"go.rtnl.ai/nlp/pkg/vector"
+	"go.rtnl.ai/nlp/pkg/vectorize"
 )
 
 // A one-stop-shop for performing NLP operations on a string of text, such as
@@ -36,9 +39,11 @@ type Text struct {
 	// Standard Tools
 	// ========================
 
-	//TODO FrequencyVectorizer
+	// FrequencyVectorizer
+	countVectorizer *vectorize.CountVectorizer
 
-	//TODO CosineSimilarizer
+	// CosineSimilarizer
+	cosineSimilarizer *similarity.CosineSimilarizer
 
 	// ========================
 	// Caching
@@ -103,9 +108,23 @@ func New(t string, options ...Option) (text *Text, err error) {
 		}
 	}
 
-	//TODO init the FrequencyVectorizer
+	// Initialize the CountVectorizer
+	if text.countVectorizer, err = vectorize.NewCountVectorizer(
+		vectorize.CountVectorizerWithLang(text.lang),
+		vectorize.CountVectorizerWithTokenizer(text.tokenizer),
+		vectorize.CountVectorizerWithStemmer(text.stemmer),
+		vectorize.CountVectorizerWithTypeCounter(text.counter),
+	); err != nil {
+		return nil, err
+	}
 
-	//TODO init the CosineSimilarizer
+	if text.cosineSimilarizer, err = similarity.NewCosineSimilarizer(
+		similarity.CosineSimilarizerWithLanguage(text.lang),
+		similarity.CosineSimilarizerWithTokenizer(text.tokenizer),
+		similarity.CosineSimilarizerWithVectorizer(text.countVectorizer),
+	); err != nil {
+		return nil, err
+	}
 
 	return text, nil
 }
@@ -159,11 +178,24 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 	return t.typecount, nil
 }
 
-// TODO func (t *Text) VectorizeOneHot() vector.Vector {}
+// VectorizeFrequency returns a frequency (count) encoding vector for the [Text]
+// and vocabulary. The vector returned has a value of the count of word
+// instances within the chunk for each vocabulary word index.
+// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
+func (t *Text) VectorizeFrequency(vocab []string) (vector.Vector, error) {
+	return t.countVectorizer.VectorizeFrequency(t.text, vocab)
+}
 
-// TODO func (t *Text) VectorizeFrequency() vector.Vector {}
+// VectorizeFrequency returns a frequency (count) encoding vector for the [Text]
+// and vocabulary. The vector returned has a value of 1 for each vocabulary
+// word index if it is present within the text and 0 otherwise.
+// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
+func (t *Text) VectorizeOneHot(vocab []string) (vector.Vector, error) {
+	return t.countVectorizer.VectorizeOneHot(t.text, vocab)
+}
 
-// TODO func (t *Text) CosineSimilarity(other *Text) float64 {}
+// FIXME: we have a vocabulary problem :()
+//TODO func (t *Text) CosineSimilarity(other *Text) float64 {}
 
 // ###########################################################################
 // Properties
@@ -218,6 +250,12 @@ func (t *Text) Tokenizer() tokenize.Tokenizer {
 	return t.tokenizer
 }
 
-//TODO get the FrequencyVectorizer
+// Returns the [vectorize.CountVectorizer] configured on this [Text].
+func (t *Text) CountVectorizer() *vectorize.CountVectorizer {
+	return t.countVectorizer
+}
 
-//TODO get the CosineSimilarizer
+// Returns the [similarity.CosineSimilarizer] configured on this [Text].
+func (t *Text) CosineSimilarizer() *similarity.CosineSimilarizer {
+	return t.cosineSimilarizer
+}

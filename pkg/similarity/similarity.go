@@ -1,4 +1,4 @@
-package compare
+package similarity
 
 import (
 	"go.rtnl.ai/nlp/pkg/enum"
@@ -12,6 +12,7 @@ import (
 // Similarizer interface
 // ############################################################################
 
+// A Similarizer compares the similarity of two strings.
 type Similarizer interface {
 	Similarity(a, b string) (similarity float64, err error)
 }
@@ -21,7 +22,7 @@ type Similarizer interface {
 // ############################################################################
 
 // CosineSimilarizer can be used to calculate the cosine similarity of two text
-// strings.
+// strings using the cosine of their vectors.
 type CosineSimilarizer struct {
 	vocab      []string
 	lang       enum.Language
@@ -32,29 +33,29 @@ type CosineSimilarizer struct {
 // Returns a new [CosineSimilarizer] with the vocabulary and options set.
 //
 // Defaults:
-//   - Lang: [LanguageEnglish]
-//   - Tokenizer: [RegexTokenizer] with the Lang above and it's own defaults
-//   - Vectorizer: [CountVectorizer] with the given vocabulary, Lang above, and
-//     it's own defaults
-func NewCosineSimilarizer(vocab []string, opts ...CosineSimilarizerOption) (similarizer *CosineSimilarizer, err error) {
+//   - Vocab: nil
+//   - Lang: [enum.LanguageEnglish]
+//   - Tokenizer: [tokenize.RegexTokenizer]
+//   - Vectorizer: [vectorize.CountVectorizer]
+func NewCosineSimilarizer(opts ...CosineSimilarizerOption) (similarizer *CosineSimilarizer, err error) {
 	// Set options
 	similarizer = &CosineSimilarizer{}
 	for _, fn := range opts {
 		fn(similarizer)
 	}
 
-	// Set vocab (a required option)
-	similarizer.vocab = vocab
-
 	//Set defaults
+
 	if similarizer.lang == enum.LanguageUnknown {
 		similarizer.lang = enum.LanguageEnglish
 	}
+
 	if similarizer.tokenizer == nil {
 		similarizer.tokenizer = tokenize.NewRegexTokenizer(tokenize.RegexTokenizerWithLanguage(similarizer.lang))
 	}
+
 	if similarizer.vectorizer == nil {
-		if similarizer.vectorizer, err = vectorize.NewCountVectorizer(similarizer.vocab, vectorize.CountVectorizerWithLang(similarizer.lang)); err != nil {
+		if similarizer.vectorizer, err = vectorize.NewCountVectorizer(vectorize.CountVectorizerWithLang(similarizer.lang)); err != nil {
 			return nil, err
 		}
 	}
@@ -83,7 +84,8 @@ func (c *CosineSimilarizer) Vectorizer() vectorize.Vectorizer {
 }
 
 // Similarity returns a value in the range [-1.0, 1.0] that indicates if two
-// strings are similar using the cosine similarity method.
+// strings are similar using the cosine similarity method. Must have set a
+// vocabulary using [With] in [NewCosineSimilarizer] to use this function.
 func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err error) {
 	//Vectorize the strings
 	var vecA, vecB vector.Vector
@@ -109,6 +111,14 @@ func (s *CosineSimilarizer) Similarity(a, b string) (similarity float64, err err
 
 // A CosineSimilarizerOption function sets options for a [CosineSimilarizer].
 type CosineSimilarizerOption func(s *CosineSimilarizer)
+
+// Returns a function which sets a [CosineSimilarizer]s vocabulary.
+// TODO (sc-34048): replace the vocab with a vocab.Vocab that is storable and etc.
+func CosineSimilarizerWithVocab(vocab []string) CosineSimilarizerOption {
+	return func(s *CosineSimilarizer) {
+		s.vocab = vocab
+	}
+}
 
 // Returns a function which sets a [CosineSimilarizer]s [enum.Language].
 func CosineSimilarizerWithLanguage(lang enum.Language) CosineSimilarizerOption {

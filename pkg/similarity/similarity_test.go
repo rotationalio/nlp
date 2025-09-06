@@ -1,32 +1,43 @@
-package compare_test
+package similarity_test
 
 import (
 	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/compare"
 	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/pkg/similarity"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 	"go.rtnl.ai/nlp/pkg/vectorize"
 )
 
 func TestNewCosineSimilarizer(t *testing.T) {
 	t.Run("SuccessDefaults", func(t *testing.T) {
-		sim, err := compare.NewCosineSimilarizer([]string{"this", "is", "a", "test"})
+		sim, err := similarity.NewCosineSimilarizer()
 		require.NoError(t, err)
 		require.NotNil(t, sim)
+	})
+
+	t.Run("SuccessVocabOption", func(t *testing.T) {
+		// setup
+		vocab := []string{"one", "two", "three"}
+		vocabOpt := similarity.CosineSimilarizerWithVocab(vocab)
+
+		// test
+		sim, err := similarity.NewCosineSimilarizer(vocabOpt)
+		require.NoError(t, err)
+		require.NotNil(t, sim)
+		require.Equal(t, vocab, sim.Vocab())
 	})
 
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		// setup
 		lang := enum.LanguageEnglish
-		optLang := compare.CosineSimilarizerWithLanguage(lang)
-		vocab := []string{"this", "is", "a", "test"}
+		optLang := similarity.CosineSimilarizerWithLanguage(lang)
 
 		// test
-		sim, err := compare.NewCosineSimilarizer(vocab, optLang)
+		sim, err := similarity.NewCosineSimilarizer(optLang)
 		require.NoError(t, err)
 		require.NotNil(t, sim)
 		require.Equal(t, lang, sim.Language())
@@ -35,11 +46,10 @@ func TestNewCosineSimilarizer(t *testing.T) {
 	t.Run("SuccessTokenizerOption_RegexTokenizer", func(t *testing.T) {
 		// setup
 		tok := tokenize.NewRegexTokenizer()
-		optTok := compare.CosineSimilarizerWithTokenizer(tok)
-		vocab := []string{"this", "is", "a", "test"}
+		optTok := similarity.CosineSimilarizerWithTokenizer(tok)
 
 		// test
-		sim, err := compare.NewCosineSimilarizer(vocab, optTok)
+		sim, err := similarity.NewCosineSimilarizer(optTok)
 		require.NoError(t, err)
 		require.NotNil(t, sim)
 		require.Equal(t, tok, sim.Tokenizer())
@@ -47,13 +57,12 @@ func TestNewCosineSimilarizer(t *testing.T) {
 
 	t.Run("SuccessVectorizerOption_CountVectorizer", func(t *testing.T) {
 		// setup
-		vocab := []string{"this", "is", "a", "test"}
-		vec, err := vectorize.NewCountVectorizer(vocab)
+		vec, err := vectorize.NewCountVectorizer()
 		require.NoError(t, err)
-		optVec := compare.CosineSimilarizerWithVectorizer(vec)
+		optVec := similarity.CosineSimilarizerWithVectorizer(vec)
 
 		// test
-		sim, err := compare.NewCosineSimilarizer(vocab, optVec)
+		sim, err := similarity.NewCosineSimilarizer(optVec)
 		require.NoError(t, err)
 		require.NotNil(t, sim)
 		require.Equal(t, vec, sim.Vectorizer())
@@ -103,7 +112,7 @@ func TestCosineSimilarity(t *testing.T) {
 
 	// setup
 	vocab := []string{"apple", "bananna", "cat", "xylophone", "youngster", "zebra"}
-	similarizer, err := compare.NewCosineSimilarizer(vocab)
+	similarizer, err := similarity.NewCosineSimilarizer(similarity.CosineSimilarizerWithVocab(vocab))
 	require.NoError(t, err)
 	require.NotNil(t, similarizer)
 
