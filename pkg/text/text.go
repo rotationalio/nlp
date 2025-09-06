@@ -130,7 +130,11 @@ func (t *Text) Tokens() (tokens *tokenlist.TokenList, err error) {
 func (t *Text) Stems() (stems *tokenlist.TokenList, err error) {
 	if t.stems == nil {
 		// Initialize the stems with the tokens
-		t.stems = tokenlist.NewCopy(t.tokens)
+		var tokens *tokenlist.TokenList
+		if tokens, err = t.Tokens(); err != nil {
+			return nil, err
+		}
+		t.stems = tokenlist.NewCopy(tokens)
 
 		// Perform stemming by replacing each token with it's stem
 		for i, tok := range t.stems.Tokens() {
