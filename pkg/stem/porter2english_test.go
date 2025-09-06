@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 )
 
@@ -29,6 +29,6 @@ func TestPorter2Single(t *testing.T) {
 	// Debug a single, specific word
 	in := "seaweed"
 	exp := "seawe"
-	act := mustNewPorter2Stemmer(enum.LanguageEnglish).Stem(in)
+	act := mustNewPorter2Stemmer(language.English).Stem(in)
 	require.Equal(t, exp, act, fmt.Sprintf("wrong stem for |%s|: expected |%s|, got |%s|", in, exp, act))
 }

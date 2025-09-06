@@ -1,4 +1,4 @@
-package enum
+package language
 
 import (
 	"slices"
@@ -8,8 +8,8 @@ import (
 type Language uint16
 
 const (
-	LanguageUnknown Language = iota
-	LanguageEnglish
+	Unknown Language = iota
+	English
 )
 
 // Returns True if the argument [enum.Language]s contains this language.

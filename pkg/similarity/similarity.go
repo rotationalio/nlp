@@ -1,7 +1,7 @@
 package similarity
 
 import (
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/mathematics"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 	"go.rtnl.ai/nlp/pkg/vector"
@@ -25,7 +25,7 @@ type Similarizer interface {
 // strings using the cosine of their vectors.
 type CosineSimilarizer struct {
 	vocab      []string
-	lang       enum.Language
+	lang       language.Language
 	tokenizer  tokenize.Tokenizer
 	vectorizer vectorize.Vectorizer
 }
@@ -34,7 +34,7 @@ type CosineSimilarizer struct {
 //
 // Defaults:
 //   - Vocab: nil
-//   - Lang: [enum.LanguageEnglish]
+//   - Lang: [language.English]
 //   - Tokenizer: [tokenize.RegexTokenizer]
 //   - Vectorizer: [vectorize.CountVectorizer]
 func NewCosineSimilarizer(opts ...CosineSimilarizerOption) (similarizer *CosineSimilarizer, err error) {
@@ -46,8 +46,8 @@ func NewCosineSimilarizer(opts ...CosineSimilarizerOption) (similarizer *CosineS
 
 	//Set defaults
 
-	if similarizer.lang == enum.LanguageUnknown {
-		similarizer.lang = enum.LanguageEnglish
+	if similarizer.lang == language.Unknown {
+		similarizer.lang = language.English
 	}
 
 	if similarizer.tokenizer == nil {
@@ -71,8 +71,8 @@ func (c *CosineSimilarizer) Vocab() []string {
 	return c.vocab
 }
 
-// Returns the [CosineSimilarizer]s configured [enum.Language].
-func (c *CosineSimilarizer) Language() enum.Language {
+// Returns the [CosineSimilarizer]s configured [language.Language].
+func (c *CosineSimilarizer) Language() language.Language {
 	return c.lang
 }
 
@@ -122,8 +122,8 @@ func CosineSimilarizerWithVocab(vocab []string) CosineSimilarizerOption {
 	}
 }
 
-// Returns a function which sets a [CosineSimilarizer]s [enum.Language].
-func CosineSimilarizerWithLanguage(lang enum.Language) CosineSimilarizerOption {
+// Returns a function which sets a [CosineSimilarizer]s [language.Language].
+func CosineSimilarizerWithLanguage(lang language.Language) CosineSimilarizerOption {
 	return func(s *CosineSimilarizer) {
 		s.lang = lang
 	}

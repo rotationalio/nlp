@@ -1,7 +1,7 @@
 package tokenize
 
 import (
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 )
 
@@ -11,7 +11,7 @@ import (
 
 // TypeCounter can be used to perform type counting on text; create with [NewTypeCounter].
 type TypeCounter struct {
-	lang      enum.Language
+	lang      language.Language
 	tokenizer Tokenizer
 	stemmer   stem.Stemmer
 }
@@ -32,8 +32,8 @@ func NewTypeCounter(opts ...TypeCounterOption) (tc *TypeCounter, err error) {
 	}
 
 	// Set defaults
-	if tc.lang == enum.LanguageUnknown {
-		tc.lang = enum.LanguageEnglish
+	if tc.lang == language.Unknown {
+		tc.lang = language.English
 	}
 
 	if tc.tokenizer == nil {
@@ -49,8 +49,8 @@ func NewTypeCounter(opts ...TypeCounterOption) (tc *TypeCounter, err error) {
 	return tc, nil
 }
 
-// Returns the [TypeCounter]s configured [enum.Language].
-func (c *TypeCounter) Languge() enum.Language {
+// Returns the [TypeCounter]s configured [language.Language].
+func (c *TypeCounter) Languge() language.Language {
 	return c.lang
 }
 
@@ -99,8 +99,8 @@ func (c *TypeCounter) CountTypes(tokens []string) (types map[string]int) {
 // TypeCounterOption functions modify a [TypeCounter].
 type TypeCounterOption func(t *TypeCounter)
 
-// TypeCounterWithLanguage sets the [enum.Language] to be used for a [TypeCounter].
-func TypeCounterWithLanguage(lang enum.Language) TypeCounterOption {
+// TypeCounterWithLanguage sets the [language.Language] to be used for a [TypeCounter].
+func TypeCounterWithLanguage(lang language.Language) TypeCounterOption {
 	return func(t *TypeCounter) {
 		t.lang = lang
 	}

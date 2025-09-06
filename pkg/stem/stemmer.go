@@ -1,8 +1,8 @@
 package stem
 
 import (
-	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/pkg/language"
 )
 
 // ############################################################################
@@ -39,7 +39,7 @@ var _ Stemmer = &Porter2Stemmer{}
 
 // Implements the Porter2 stemming algorithm.
 type Porter2Stemmer struct {
-	lang enum.Language
+	lang language.Language
 
 	// Implementation function (set in [NewPorter2Stemmer])
 	impl func(string) string
@@ -51,13 +51,13 @@ type Porter2Stemmer struct {
 	p2 int
 }
 
-// Returns a new [Porter2Stemmer] which supports the [enum.Language] given, or an
+// Returns a new [Porter2Stemmer] which supports the [language.Language] given, or an
 // error if the language is not supported.
-func NewPorter2Stemmer(lang enum.Language) (stemmer *Porter2Stemmer, err error) {
+func NewPorter2Stemmer(lang language.Language) (stemmer *Porter2Stemmer, err error) {
 	// Setup the stemmer for the selected language
 	stemmer = &Porter2Stemmer{lang: lang}
 	switch stemmer.lang {
-	case enum.LanguageEnglish:
+	case language.English:
 		// 30 runes is long enough for most English words
 		stemmer.word = make([]rune, 30)
 		// Use English stemmer
@@ -70,8 +70,8 @@ func NewPorter2Stemmer(lang enum.Language) (stemmer *Porter2Stemmer, err error) 
 	return stemmer, nil
 }
 
-// Returns the [Porter2Stemmer]s configured [enum.Language].
-func (p *Porter2Stemmer) Language() enum.Language {
+// Returns the [Porter2Stemmer]s configured [language.Language].
+func (p *Porter2Stemmer) Language() language.Language {
 	return p.lang
 }
 

@@ -57,7 +57,7 @@ package text
 import (
 	"unicode/utf8"
 
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/similarity"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/token"
@@ -78,7 +78,7 @@ type Text struct {
 	// ==============================
 
 	vocab     []string // used for the [vectorize.CountVectorizer]
-	lang      enum.Language
+	lang      language.Language
 	stemmer   stem.Stemmer
 	tokenizer tokenize.Tokenizer
 
@@ -103,7 +103,7 @@ type Text struct {
 //
 // Defaults:
 //   - Vocabulary (use [WithVocabulary]): nil (errors will be returned from certain functions if a vocabulary is not added)
-//   - Language (use [WithLanguage]): [enum.LanguageEnglish]
+//   - Language (use [WithLanguage]): [language.English]
 //   - Stemmer (use [WithStemmer]): [stem.Porter2Stemmer]
 //   - Tokenizer (use [WithTokenizer]): [tokenize.RegexTokenizer]
 func New(t string, options ...Option) (text *Text, err error) {
@@ -120,8 +120,8 @@ func New(t string, options ...Option) (text *Text, err error) {
 	}
 
 	// Default languge
-	if text.lang == enum.LanguageUnknown {
-		text.lang = enum.LanguageEnglish
+	if text.lang == language.Unknown {
+		text.lang = language.English
 	}
 
 	// Default stemmer
@@ -288,8 +288,13 @@ func (t *Text) Bytes() []byte {
 	return []byte(t.text)
 }
 
-// Returns the [enum.Language] configured on this [Text].
-func (t *Text) Language() enum.Language {
+// Returns the vocabulary configured on this [Text].
+func (t *Text) Vocab() []string {
+	return t.vocab
+}
+
+// Returns the [language.Language] configured on this [Text].
+func (t *Text) Language() language.Language {
 	return t.lang
 }
 

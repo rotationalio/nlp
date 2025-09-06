@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 )
 
 // ############################################################################
@@ -13,9 +13,9 @@ import (
 
 // Returns true if word is a stop word for the given language. If the language
 // is not implemented this function will return false.
-func IsStopWord(word string, lang enum.Language) bool {
+func IsStopWord(word string, lang language.Language) bool {
 	switch lang {
-	case enum.LanguageEnglish:
+	case language.English:
 		return slices.Contains(English[:], strings.TrimSpace(strings.ToLower(word)))
 	}
 	return false
@@ -25,7 +25,7 @@ func IsStopWord(word string, lang enum.Language) bool {
 // English List
 // ############################################################################
 
-// Stop words for [enum.LanguageEnglish]. Extracted from the [snowballstem.org stop
+// Stop words for [language.English]. Extracted from the [snowballstem.org stop
 // words list on GitHub], which is BSD 3-clause licensed.
 //
 // [snowballstem.org stop words list on GitHub]: https://github.com/snowballstem/snowball-website/blob/1f7a15d10924fb38f90519d95a875342cf3e87ba/algorithms/english/stop.txt

@@ -3,7 +3,7 @@ package tokenize
 import (
 	"regexp"
 
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 )
 
 // ############################################################################
@@ -35,7 +35,7 @@ var _ Tokenizer = &RegexTokenizer{}
 
 // RegexTokenizer can be used to tokenize text; create with [NewRegexTokenizer].
 type RegexTokenizer struct {
-	lang  enum.Language
+	lang  language.Language
 	regex string
 }
 
@@ -52,8 +52,8 @@ func NewRegexTokenizer(opts ...RegexTokenizerOption) *RegexTokenizer {
 	}
 
 	// Set defaults
-	if tokenizer.lang == enum.LanguageUnknown {
-		tokenizer.lang = enum.LanguageEnglish
+	if tokenizer.lang == language.Unknown {
+		tokenizer.lang = language.English
 	}
 	if tokenizer.regex == "" {
 		tokenizer.regex = REGEX_ENGLISH_WORDS
@@ -62,8 +62,8 @@ func NewRegexTokenizer(opts ...RegexTokenizerOption) *RegexTokenizer {
 	return tokenizer
 }
 
-// Returns the [RegexTokenizer]s configured [enum.Language]
-func (t *RegexTokenizer) Language() enum.Language {
+// Returns the [RegexTokenizer]s configured [language.Language]
+func (t *RegexTokenizer) Language() language.Language {
 	return t.lang
 }
 
@@ -93,8 +93,8 @@ func (t *RegexTokenizer) Tokenize(chunk string) (tokens []string, err error) {
 // RegexTokenizerOption functions modify a [RegexTokenizer].
 type RegexTokenizerOption func(t *RegexTokenizer)
 
-// Returns a function which sets the [enum.Language] to use with the [RegexTokenizer].
-func RegexTokenizerWithLanguage(lang enum.Language) RegexTokenizerOption {
+// Returns a function which sets the [language.Language] to use with the [RegexTokenizer].
+func RegexTokenizerWithLanguage(lang language.Language) RegexTokenizerOption {
 	return func(t *RegexTokenizer) {
 		t.lang = lang
 	}

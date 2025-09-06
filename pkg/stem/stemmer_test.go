@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 )
 
@@ -31,7 +31,7 @@ func TestStemmers(t *testing.T) {
 		},
 		{
 			TestName:     "Porter2Stemmer [LanguageEnglish]",
-			Stemmer:      mustNewPorter2Stemmer(enum.LanguageEnglish),
+			Stemmer:      mustNewPorter2Stemmer(language.English),
 			InputPath:    "testdata/Porter2Stemmer/voc.txt",
 			ExpectedPath: "testdata/Porter2Stemmer/output.txt",
 		},
@@ -81,7 +81,7 @@ func TestStemmers(t *testing.T) {
 
 // Returns a new [quant.Porter2Stemmer] which supports the [quant.Language]
 // given or panics on an error.
-func mustNewPorter2Stemmer(lang enum.Language) (stemmer *stem.Porter2Stemmer) {
+func mustNewPorter2Stemmer(lang language.Language) (stemmer *stem.Porter2Stemmer) {
 	var err error
 	if stemmer, err = stem.NewPorter2Stemmer(lang); err != nil {
 		panic(err)

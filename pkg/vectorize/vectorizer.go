@@ -1,8 +1,8 @@
 package vectorize
 
 import (
-	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 	"go.rtnl.ai/nlp/pkg/vector"
@@ -24,7 +24,7 @@ type Vectorizer interface {
 // text vectorization algorithms.
 type CountVectorizer struct {
 	vocab       []string
-	lang        enum.Language
+	lang        language.Language
 	tokenizer   tokenize.Tokenizer
 	stemmer     stem.Stemmer
 	typeCounter *tokenize.TypeCounter
@@ -35,7 +35,7 @@ type CountVectorizer struct {
 //
 // Defaults:
 //   - Vocab: nil
-//   - Lang: [enum.LanguageEnglish]
+//   - Lang: [language.English]
 //   - Tokenizer: [tokenize.RegexTokenizer]
 //   - Stemmer: [stem.Porter2Stemmer]
 //   - TypeCounter: [tokenize.TypeCounter]
@@ -49,8 +49,8 @@ func NewCountVectorizer(opts ...CountVectorizerOption) (vectorizer *CountVectori
 
 	// Set defaults
 
-	if vectorizer.lang == enum.LanguageUnknown {
-		vectorizer.lang = enum.LanguageEnglish
+	if vectorizer.lang == language.Unknown {
+		vectorizer.lang = language.English
 	}
 
 	if vectorizer.tokenizer == nil {
@@ -85,8 +85,8 @@ func (c *CountVectorizer) Vocab() []string {
 	return c.vocab
 }
 
-// Returns the [CountVectorizer]s configured [enum.Language].
-func (c *CountVectorizer) Language() enum.Language {
+// Returns the [CountVectorizer]s configured [language.Language].
+func (c *CountVectorizer) Language() language.Language {
 	return c.lang
 }
 
@@ -197,9 +197,9 @@ func CountVectorizerWithVocab(vocab []string) CountVectorizerOption {
 	}
 }
 
-// CountVectorizerWithLang sets the [enum.Language] to use with the
+// CountVectorizerWithLang sets the [language.Language] to use with the
 // [CountVectorizer].
-func CountVectorizerWithLang(lang enum.Language) CountVectorizerOption {
+func CountVectorizerWithLang(lang language.Language) CountVectorizerOption {
 	return func(c *CountVectorizer) {
 		c.lang = lang
 	}

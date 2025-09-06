@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 	"go.rtnl.ai/nlp/pkg/vector"
@@ -32,7 +32,7 @@ func TestNewCountVectorizer(t *testing.T) {
 
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
-		lang := enum.LanguageEnglish
+		lang := language.English
 		langOpt := vectorize.CountVectorizerWithLang(lang)
 
 		//test
@@ -56,7 +56,7 @@ func TestNewCountVectorizer(t *testing.T) {
 
 	t.Run("SuccessStemmerOption_Porter2Stemmer", func(t *testing.T) {
 		//setup
-		stemmer, err := stem.NewPorter2Stemmer(enum.LanguageEnglish)
+		stemmer, err := stem.NewPorter2Stemmer(language.English)
 		require.NoError(t, err)
 		stemOpt := vectorize.CountVectorizerWithStemmer(stemmer)
 

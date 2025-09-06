@@ -1,7 +1,7 @@
 package text
 
 import (
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 )
@@ -16,8 +16,8 @@ func WithVocabulary(vocab []string) Option {
 	}
 }
 
-// Returns a function that sets the [enum.Language] on a [Text].
-func WithLanguage(lang enum.Language) Option {
+// Returns a function that sets the [language.Language] on a [Text].
+func WithLanguage(lang language.Language) Option {
 	return func(text *Text) {
 		text.lang = lang
 	}

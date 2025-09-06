@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/stem"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 )
@@ -18,14 +18,14 @@ func TestNewTypeCounter(t *testing.T) {
 
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
-		lang := enum.LanguageEnglish
+		lang := language.English
 		langOpt := tokenize.TypeCounterWithLanguage(lang)
 
 		//test
 		tc, err := tokenize.NewTypeCounter(langOpt)
 		require.NoError(t, err)
 		require.NotNil(t, tc)
-		require.Equal(t, enum.LanguageEnglish, tc.Languge())
+		require.Equal(t, language.English, tc.Languge())
 	})
 
 	t.Run("SuccessTokenizerOption_RegexTokenizer", func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestNewTypeCounter(t *testing.T) {
 
 	t.Run("SuccessStemmerOption_Porter2Stemmer", func(t *testing.T) {
 		//setup
-		lang := enum.LanguageEnglish
+		lang := language.English
 		stemmer, err := stem.NewPorter2Stemmer(lang)
 		require.NoError(t, err)
 		stemOpt := tokenize.TypeCounterWithStemmer(stemmer)

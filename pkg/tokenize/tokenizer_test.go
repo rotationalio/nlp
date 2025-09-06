@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/enum"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 )
 
@@ -16,7 +16,7 @@ func TestNewRegexTokenizer(t *testing.T) {
 
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		//setup
-		lang := enum.LanguageEnglish
+		lang := language.English
 		langOpt := tokenize.RegexTokenizerWithLanguage(lang)
 
 		//test

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/pkg/language"
 	"go.rtnl.ai/nlp/pkg/similarity"
 	"go.rtnl.ai/nlp/pkg/tokenize"
 	"go.rtnl.ai/nlp/pkg/vectorize"
@@ -33,7 +33,7 @@ func TestNewCosineSimilarizer(t *testing.T) {
 
 	t.Run("SuccessLanguageOption_LanguageEnglish", func(t *testing.T) {
 		// setup
-		lang := enum.LanguageEnglish
+		lang := language.English
 		optLang := similarity.CosineSimilarizerWithLanguage(lang)
 
 		// test
