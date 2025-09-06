@@ -68,52 +68,35 @@ import (
 )
 
 // A one-stop-shop for performing NLP operations on a string of text, such as
-// stemming, vectorization, or similarity to another string.
+// tokenization, stemming, vectorization, etc.
 type Text struct {
-	// The string representation of the text.
+	// The string representation of the text
 	text string
 
-	// ========================
+	// ==============================
 	// Options
-	// ========================
+	// ==============================
 
-	// The [enum.Language] of this text.
-	lang enum.Language
-
-	// The [stem.Stemmer] to use for stemming this text's tokens.
-	stemmer stem.Stemmer
-
-	// The [tokenize.Tokenizer] to use for tokenizing this text.
+	vocab     []string // used for the [vectorize.CountVectorizer]
+	lang      enum.Language
+	stemmer   stem.Stemmer
 	tokenizer tokenize.Tokenizer
 
-	// The [tokenize.TypeCounter] to use for tokenizing this text.
-	counter *tokenize.TypeCounter
-
-	// ========================
+	// ==============================
 	// Standard Tools
-	// ========================
+	// ==============================
 
-	// FrequencyVectorizer
-	countVectorizer *vectorize.CountVectorizer
-
-	// CosineSimilarizer
+	counter           *tokenize.TypeCounter
+	countVectorizer   *vectorize.CountVectorizer
 	cosineSimilarizer *similarity.CosineSimilarizer
 
-	// ========================
-	// Caching
-	// ========================
+	// ==============================
+	// Caching (lazy initialization)
+	// ==============================
 
-	// Cache of tokens of this text; lazily initialized.
-	tokens *tokenlist.TokenList
-
-	// Cache of stem tokens of this text; lazily initialized.
-	stems *tokenlist.TokenList
-
-	// Cache of type count of this text; lazily initialized.
+	tokens    *tokenlist.TokenList
+	stems     *tokenlist.TokenList
 	typecount map[string]int
-
-	// Cache for the vocabulary to use when using the countVectorizer
-	vocab []string
 }
 
 // Create a new [Text] from the input string with the specified [Option]s.
@@ -126,10 +109,10 @@ type Text struct {
 func New(t string, options ...Option) (text *Text, err error) {
 	// Initialize text
 	text = &Text{
-		text:   t,
-		tokens: nil, // will tokenize on the first call to Tokens()
-		stems:  nil, // will stem the tokens on the first call to Stems()
+		text: t,
 	}
+
+	// OPTIONS
 
 	// Set user options
 	for _, opt := range options {
@@ -155,7 +138,9 @@ func New(t string, options ...Option) (text *Text, err error) {
 		)
 	}
 
-	// Default type counter
+	// STANDARD TOOLS
+
+	// Initialize the [tokenize.TypeCounter]
 	if text.counter == nil {
 		if text.counter, err = tokenize.NewTypeCounter(
 			tokenize.TypeCounterWithLanguage(text.lang),
@@ -166,7 +151,7 @@ func New(t string, options ...Option) (text *Text, err error) {
 		}
 	}
 
-	// Initialize the CountVectorizer
+	// Initialize the [vectorize.CountVectorizer]
 	if text.countVectorizer, err = vectorize.NewCountVectorizer(
 		vectorize.CountVectorizerWithLang(text.lang),
 		vectorize.CountVectorizerWithTokenizer(text.tokenizer),
@@ -176,6 +161,7 @@ func New(t string, options ...Option) (text *Text, err error) {
 		return nil, err
 	}
 
+	// Initialize the [similarity.CosineSimilarizer]
 	if text.cosineSimilarizer, err = similarity.NewCosineSimilarizer(
 		similarity.CosineSimilarizerWithLanguage(text.lang),
 		similarity.CosineSimilarizerWithTokenizer(text.tokenizer),
@@ -230,6 +216,7 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 		if stems, err = t.Stems(); err != nil {
 			return nil, err
 		}
+
 		// Count the stems to get the type count
 		t.typecount = t.counter.CountTypes(stems.Strings())
 	}
