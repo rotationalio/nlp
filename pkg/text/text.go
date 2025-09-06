@@ -115,9 +115,11 @@ func New(t string, options ...Option) (text *Text, err error) {
 // subsequent calls.
 func (t *Text) Tokens() (tokens *tokenlist.TokenList, err error) {
 	if t.tokens == nil {
-		if t.tokens, err = t.tokenizer.Tokenize(t.text); err != nil {
+		var toks []string
+		if toks, err = t.tokenizer.Tokenize(t.text); err != nil {
 			return nil, err
 		}
+		t.tokens = tokenlist.New(toks)
 	}
 	return t.tokens, nil
 }

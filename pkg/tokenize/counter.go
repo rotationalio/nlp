@@ -3,7 +3,6 @@ package tokenize
 import (
 	"go.rtnl.ai/nlp/pkg/enum"
 	"go.rtnl.ai/nlp/pkg/stem"
-	"go.rtnl.ai/nlp/pkg/tokenlist"
 )
 
 // ############################################################################
@@ -68,19 +67,18 @@ func (c *TypeCounter) Stemmer() stem.Stemmer {
 // Returns a map of the types (unique words) and their counts for the string.
 func (c *TypeCounter) TypeCount(chunk string) (types map[string]int, err error) {
 	// Tokenize
-	var tokens *tokenlist.TokenList
+	var tokens []string
 	if tokens, err = c.tokenizer.Tokenize(chunk); err != nil {
 		return nil, err
 	}
 
 	// Stem
-	toks := tokens.Strings()
-	for i, tok := range toks {
-		toks[i] = c.stemmer.Stem(tok)
+	for i, tok := range tokens {
+		tokens[i] = c.stemmer.Stem(tok)
 	}
 
 	// Count
-	return c.CountTypes(toks), nil
+	return c.CountTypes(tokens), nil
 }
 
 // CountTypes returns a the count of each type (unique word) in the given token

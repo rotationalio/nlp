@@ -4,7 +4,6 @@ import (
 	"regexp"
 
 	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/tokenlist"
 )
 
 // ############################################################################
@@ -12,7 +11,7 @@ import (
 // ############################################################################
 
 type Tokenizer interface {
-	Tokenize(chunk string) (tokens *tokenlist.TokenList, err error)
+	Tokenize(chunk string) (tokens []string, err error)
 }
 
 // ############################################################################
@@ -74,7 +73,7 @@ func (t *RegexTokenizer) Regex() string {
 }
 
 // Tokenizes a text string using [regexp.Regexp.FindAllString].
-func (t *RegexTokenizer) Tokenize(chunk string) (tokens *tokenlist.TokenList, err error) {
+func (t *RegexTokenizer) Tokenize(chunk string) (tokens []string, err error) {
 	// Compile regexp
 	var r *regexp.Regexp
 	if r, err = regexp.Compile(t.regex); err != nil {
@@ -82,7 +81,7 @@ func (t *RegexTokenizer) Tokenize(chunk string) (tokens *tokenlist.TokenList, er
 	}
 
 	// Tokenize with regex
-	tokens = tokenlist.New(r.FindAllString(chunk, -1))
+	tokens = r.FindAllString(chunk, -1)
 
 	return tokens, nil
 }
