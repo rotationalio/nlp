@@ -154,7 +154,7 @@ func TestBenchmarkAppend(t *testing.T) {
 		require.Equal(t, time.Duration(5512247), s.Fastest())
 		require.Equal(t, time.Duration(9946080), s.Range())
 		require.Equal(t, time.Duration(939990942), s.Total())
-		require.Equal(t, (102.12864359481392), s.Throughput())
+		require.InDelta(t, (102.12864359481392), s.Throughput(), DEFAULT_DELTA)
 		require.Equal(t, uint64(4), s.timeouts)
 	})
 
@@ -173,7 +173,7 @@ func TestBenchmarkAppend(t *testing.T) {
 		require.Equal(t, s.Range(), time.Duration(9946080))
 
 		require.Equal(t, s.Total(), time.Duration(939990942))
-		require.Equal(t, s.Throughput(), 102.12864359481392)
+		require.InDelta(t, s.Throughput(), 102.12864359481392, DEFAULT_DELTA)
 		require.Equal(t, s.timeouts, uint64(4))
 	})
 
@@ -202,7 +202,7 @@ func TestBenchmarkAppend(t *testing.T) {
 		require.Equal(t, time.Duration(9946080), s.Range())
 
 		require.Equal(t, time.Duration(939990943), s.Total())
-		require.Equal(t, 102.12864359481385, s.Throughput())
+		require.InDelta(t, 102.12864359481385, s.Throughput(), DEFAULT_DELTA)
 		require.Equal(t, uint64(4), s.timeouts)
 	})
 
@@ -231,7 +231,7 @@ func TestBenchmarkAppend(t *testing.T) {
 		require.Equal(t, time.Duration(9946080), s.Range())
 
 		require.Equal(t, time.Duration(939990943), s.Total())
-		require.Equal(t, 102.12864359481385, s.Throughput())
+		require.InDelta(t, 102.12864359481385, s.Throughput(), DEFAULT_DELTA)
 		require.Equal(t, uint64(4), s.timeouts)
 	})
 

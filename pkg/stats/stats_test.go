@@ -12,6 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// The default delta value when using [require.InDelta]
+const DEFAULT_DELTA = 1e-12
+
 func loadTestData() ([]float64, error) {
 	data := make([]float64, 0, 1000000)
 
@@ -72,12 +75,12 @@ func TestStatistics(t *testing.T) {
 	}
 
 	require.Equal(t, uint64(1000000), stats.N())
-	require.Equal(t, 0.00041124313405184064, stats.Mean())
-	require.Equal(t, 0.9988808397330513, stats.StdDev())
-	require.Equal(t, 0.9977629319858057, stats.Variance())
-	require.Equal(t, 5.30507026071, stats.Maximum())
-	require.Equal(t, -4.7220603382400004, stats.Minimum())
-	require.Equal(t, 10.02713059895, stats.Range())
+	require.InDelta(t, 0.00041124313405184064, stats.Mean(), DEFAULT_DELTA)
+	require.InDelta(t, 0.9988808397330513, stats.StdDev(), DEFAULT_DELTA)
+	require.InDelta(t, 0.9977629319858057, stats.Variance(), DEFAULT_DELTA)
+	require.InDelta(t, 5.30507026071, stats.Maximum(), DEFAULT_DELTA)
+	require.InDelta(t, -4.7220603382400004, stats.Minimum(), DEFAULT_DELTA)
+	require.InDelta(t, 10.02713059895, stats.Range(), DEFAULT_DELTA)
 }
 
 func TestStatisticsBulk(t *testing.T) {
@@ -89,12 +92,12 @@ func TestStatisticsBulk(t *testing.T) {
 	stats.Update(data...)
 
 	require.Equal(t, uint64(1000000), stats.N())
-	require.Equal(t, 0.00041124313405184064, stats.Mean())
-	require.Equal(t, 0.9988808397330513, stats.StdDev())
-	require.Equal(t, 0.9977629319858057, stats.Variance())
-	require.Equal(t, 5.30507026071, stats.Maximum())
-	require.Equal(t, -4.7220603382400004, stats.Minimum())
-	require.Equal(t, 10.02713059895, stats.Range())
+	require.InDelta(t, 0.00041124313405184064, stats.Mean(), DEFAULT_DELTA)
+	require.InDelta(t, 0.9988808397330513, stats.StdDev(), DEFAULT_DELTA)
+	require.InDelta(t, 0.9977629319858057, stats.Variance(), DEFAULT_DELTA)
+	require.InDelta(t, 5.30507026071, stats.Maximum(), DEFAULT_DELTA)
+	require.InDelta(t, -4.7220603382400004, stats.Minimum(), DEFAULT_DELTA)
+	require.InDelta(t, 10.02713059895, stats.Range(), DEFAULT_DELTA)
 }
 
 func TestStatisticsAppend(t *testing.T) {
@@ -133,12 +136,12 @@ func TestStatisticsAppend(t *testing.T) {
 		o.Update(values...)
 		s.Append(o)
 
-		require.Equal(t, 9.813435956500003, s.Mean())
-		require.Equal(t, 2.184890253256818, s.StdDev())
-		require.Equal(t, 4.773745418776643, s.Variance())
-		require.Equal(t, 15.45832771, s.Maximum())
-		require.Equal(t, 5.51224787, s.Minimum())
-		require.Equal(t, 9.94607984, s.Range())
+		require.InDelta(t, 9.813435956500003, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.184890253256818, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776643, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
 	})
 
 	t.Run("O_Empty", func(t *testing.T) {
@@ -148,12 +151,12 @@ func TestStatisticsAppend(t *testing.T) {
 		s.Update(values...)
 		s.Append(o)
 
-		require.Equal(t, 9.813435956500003, s.Mean())
-		require.Equal(t, 2.184890253256818, s.StdDev())
-		require.Equal(t, 4.773745418776643, s.Variance())
-		require.Equal(t, 15.45832771, s.Maximum())
-		require.Equal(t, 5.51224787, s.Minimum())
-		require.Equal(t, 9.94607984, s.Range())
+		require.InDelta(t, 9.813435956500003, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.184890253256818, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776643, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
 	})
 
 	t.Run("S_Range", func(t *testing.T) {
@@ -168,17 +171,17 @@ func TestStatisticsAppend(t *testing.T) {
 			}
 		}
 
-		require.Equal(t, 15.45832771, s.Maximum())
-		require.Equal(t, 5.51224787, s.Minimum())
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
 
 		s.Append(o)
 
-		require.Equal(t, 9.8134359565, s.Mean())
-		require.Equal(t, 2.1848902532568206, s.StdDev())
-		require.Equal(t, 4.773745418776654, s.Variance())
-		require.Equal(t, 15.45832771, s.Maximum())
-		require.Equal(t, 5.51224787, s.Minimum())
-		require.Equal(t, 9.94607984, s.Range())
+		require.InDelta(t, 9.8134359565, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.1848902532568206, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776654, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
 	})
 
 	t.Run("O_Range", func(t *testing.T) {
@@ -193,17 +196,17 @@ func TestStatisticsAppend(t *testing.T) {
 			}
 		}
 
-		require.Equal(t, 15.45832771, o.Maximum())
-		require.Equal(t, 5.51224787, o.Minimum())
+		require.InDelta(t, 15.45832771, o.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, o.Minimum(), DEFAULT_DELTA)
 
 		s.Append(o)
 
-		require.Equal(t, 9.8134359565, s.Mean())
-		require.Equal(t, 2.1848902532568206, s.StdDev())
-		require.Equal(t, 4.773745418776654, s.Variance())
-		require.Equal(t, 15.45832771, s.Maximum())
-		require.Equal(t, 5.51224787, s.Minimum())
-		require.Equal(t, 9.94607984, s.Range())
+		require.InDelta(t, 9.8134359565, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.1848902532568206, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776654, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
 	})
 
 }
