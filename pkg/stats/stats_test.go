@@ -134,7 +134,7 @@ func TestStatisticsAppend(t *testing.T) {
 		s.Append(o)
 
 		require.Equal(t, 9.813435956500003, s.Mean())
-		require.Equal(t, 2.1848902532568184, s.StdDev())
+		require.Equal(t, 2.184890253256818, s.StdDev())
 		require.Equal(t, 4.773745418776644, s.Variance())
 		require.Equal(t, 15.45832771, s.Maximum())
 		require.Equal(t, 5.51224787, s.Minimum())
@@ -149,7 +149,7 @@ func TestStatisticsAppend(t *testing.T) {
 		s.Append(o)
 
 		require.Equal(t, 9.813435956500003, s.Mean())
-		require.Equal(t, 2.1848902532568184, s.StdDev())
+		require.Equal(t, 2.184890253256818, s.StdDev())
 		require.Equal(t, 4.773745418776644, s.Variance())
 		require.Equal(t, 15.45832771, s.Maximum())
 		require.Equal(t, 5.51224787, s.Minimum())
@@ -175,7 +175,7 @@ func TestStatisticsAppend(t *testing.T) {
 
 		require.Equal(t, 9.8134359565, s.Mean())
 		require.Equal(t, 2.1848902532568206, s.StdDev())
-		require.Equal(t, 4.773745418776653, s.Variance())
+		require.Equal(t, 4.773745418776654, s.Variance())
 		require.Equal(t, 15.45832771, s.Maximum())
 		require.Equal(t, 5.51224787, s.Minimum())
 		require.Equal(t, 9.94607984, s.Range())
@@ -200,7 +200,7 @@ func TestStatisticsAppend(t *testing.T) {
 
 		require.Equal(t, 9.8134359565, s.Mean())
 		require.Equal(t, 2.1848902532568206, s.StdDev())
-		require.Equal(t, 4.773745418776653, s.Variance())
+		require.Equal(t, 4.773745418776654, s.Variance())
 		require.Equal(t, 15.45832771, s.Maximum())
 		require.Equal(t, 5.51224787, s.Minimum())
 		require.Equal(t, 9.94607984, s.Range())
