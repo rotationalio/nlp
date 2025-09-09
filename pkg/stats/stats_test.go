@@ -1,0 +1,250 @@
+package stats
+
+import (
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"sync"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+// The default delta value when using [require.InDelta]
+const DEFAULT_DELTA = 1e-12
+
+var (
+	dataMu   sync.Once
+	testData []float64
+	testErr  error
+)
+
+const (
+	testSeed = 512
+	testN    = 1000000
+	testNs   = 10000
+)
+
+func loadTestData() ([]float64, error) {
+	dataMu.Do(func() {
+		source := rand.NewSource(testSeed)
+		r := rand.New(source)
+
+		var n int
+		if testing.Short() {
+			n = testNs
+		} else {
+			n = testN
+		}
+
+		testData = make([]float64, n)
+		for i := 0; i < n; i++ {
+			testData[i] = r.NormFloat64() // nolint:gosec
+		}
+	})
+	return testData, testErr
+}
+
+func ExampleStatistics() {
+	stats := new(Statistics)
+	samples, _ := loadTestData()
+
+	for _, sample := range samples {
+		stats.Update(sample)
+	}
+
+	data, _ := json.MarshalIndent(stats.Serialize(), "", "  ")
+	fmt.Println(string(data))
+	// Output:
+	// {
+	//   "maximum": 4.68334707355854,
+	//   "mean": -0.0009190805164398931,
+	//   "minimum": -4.769677332279344,
+	//   "range": 9.453024405837883,
+	//   "samples": 1000000,
+	//   "stddev": 1.0003036264147471,
+	//   "total": -919.0805164398931,
+	//   "variance": 1.000607345018494
+	// }
+}
+
+func TestStatistics(t *testing.T) {
+	data, err := loadTestData()
+	require.NoError(t, err)
+	require.NotNil(t, data)
+
+	stats := new(Statistics)
+
+	for _, v := range data {
+		stats.Update(v)
+	}
+
+	require.Equal(t, uint64(1000000), stats.N())
+	require.InDelta(t, -0.0009190805164398931, stats.Mean(), DEFAULT_DELTA)
+	require.InDelta(t, 1.0003036264147471, stats.StdDev(), DEFAULT_DELTA)
+	require.InDelta(t, 1.000607345018494, stats.Variance(), DEFAULT_DELTA)
+	require.InDelta(t, 4.68334707355854, stats.Maximum(), DEFAULT_DELTA)
+	require.InDelta(t, -4.769677332279344, stats.Minimum(), DEFAULT_DELTA)
+	require.InDelta(t, 9.453024405837883, stats.Range(), DEFAULT_DELTA)
+}
+
+func TestStatisticsBulk(t *testing.T) {
+	data, err := loadTestData()
+	require.NoError(t, err)
+	require.NotNil(t, data)
+
+	stats := new(Statistics)
+	stats.Update(data...)
+
+	require.Equal(t, uint64(1000000), stats.N())
+	require.InDelta(t, -0.0009190805164398931, stats.Mean(), DEFAULT_DELTA)
+	require.InDelta(t, 1.0003036264147471, stats.StdDev(), DEFAULT_DELTA)
+	require.InDelta(t, 1.000607345018494, stats.Variance(), DEFAULT_DELTA)
+	require.InDelta(t, 4.68334707355854, stats.Maximum(), DEFAULT_DELTA)
+	require.InDelta(t, -4.769677332279344, stats.Minimum(), DEFAULT_DELTA)
+	require.InDelta(t, 9.453024405837883, stats.Range(), DEFAULT_DELTA)
+}
+
+func TestStatisticsAppend(t *testing.T) {
+	values := []float64{
+		15.45832771, 11.11727874, 10.30855758, 14.63626755,
+		5.85474266, 10.37473159, 11.02068524, 9.92171508,
+		9.45442518, 11.84815447, 11.98722063, 11.54485569,
+		8.49187437, 8.32798107, 9.85561918, 8.64735984,
+		6.20092164, 7.33269192, 11.79721845, 7.57280214,
+		7.32801938, 11.7176034, 10.27039045, 12.52726886,
+		8.84401993, 6.79783127, 7.42687921, 7.53989174,
+		9.29713199, 10.67506366, 6.63483678, 9.54300577,
+		9.93653413, 13.92093238, 7.95542668, 12.00052091,
+		11.82680248, 5.89729658, 8.54045647, 13.60981458,
+		10.00865388, 7.92837157, 8.31076266, 9.18471422,
+		7.84693233, 8.76741161, 10.87795873, 14.65658323,
+		7.85521071, 9.04012243, 7.43535867, 10.15812301,
+		12.46519105, 7.35042452, 9.95608467, 11.42583285,
+		9.83193081, 9.67750682, 11.16649223, 8.94295236,
+		10.01809469, 7.17197717, 7.55621033, 13.3999663,
+		11.85703991, 9.20101557, 8.29058923, 7.20849446,
+		8.86770357, 8.8384832, 8.79774152, 9.26089846,
+		8.16864633, 10.87662162, 8.39197205, 7.41328472,
+		13.22198834, 11.29517127, 12.1842384, 10.41771674,
+		10.8701562, 10.02489038, 12.04101253, 10.32352415,
+		10.77943047, 9.12459943, 11.04568103, 13.54620779,
+		14.221192, 13.43122872, 8.32564618, 10.43884202,
+		10.30555116, 7.36896287, 10.7156544, 10.96224612,
+		5.70032716, 8.45044525, 5.51224787, 8.7881203,
+	}
+
+	t.Run("S_Empty", func(t *testing.T) {
+		s := new(Statistics)
+		o := new(Statistics)
+
+		o.Update(values...)
+		s.Append(o)
+
+		require.InDelta(t, 9.813435956500003, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.184890253256818, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776643, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
+	})
+
+	t.Run("O_Empty", func(t *testing.T) {
+		s := new(Statistics)
+		o := new(Statistics)
+
+		s.Update(values...)
+		s.Append(o)
+
+		require.InDelta(t, 9.813435956500003, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.184890253256818, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776643, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
+	})
+
+	t.Run("S_Range", func(t *testing.T) {
+		s := new(Statistics)
+		o := new(Statistics)
+
+		for i, v := range values {
+			if i%2 == 0 {
+				s.Update(v)
+			} else {
+				o.Update(v)
+			}
+		}
+
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+
+		s.Append(o)
+
+		require.InDelta(t, 9.8134359565, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.1848902532568206, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776654, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
+	})
+
+	t.Run("O_Range", func(t *testing.T) {
+		s := new(Statistics)
+		o := new(Statistics)
+
+		for i, v := range values {
+			if i%2 == 0 {
+				o.Update(v)
+			} else {
+				s.Update(v)
+			}
+		}
+
+		require.InDelta(t, 15.45832771, o.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, o.Minimum(), DEFAULT_DELTA)
+
+		s.Append(o)
+
+		require.InDelta(t, 9.8134359565, s.Mean(), DEFAULT_DELTA)
+		require.InDelta(t, 2.1848902532568206, s.StdDev(), DEFAULT_DELTA)
+		require.InDelta(t, 4.773745418776654, s.Variance(), DEFAULT_DELTA)
+		require.InDelta(t, 15.45832771, s.Maximum(), DEFAULT_DELTA)
+		require.InDelta(t, 5.51224787, s.Minimum(), DEFAULT_DELTA)
+		require.InDelta(t, 9.94607984, s.Range(), DEFAULT_DELTA)
+	})
+
+}
+
+func BenchmarkStatistics_Update(b *testing.B) {
+	source42 := rand.NewSource(42)
+	rand42 := rand.New(source42)
+	stats := new(Statistics)
+
+	for i := 0; i < b.N; i++ {
+		val := rand42.Float64()
+		stats.Update(val)
+	}
+}
+
+func BenchmarkStatistics_Sequential(b *testing.B) {
+	data, _ := loadTestData()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		stats := new(Statistics)
+		for _, val := range data {
+			stats.Update(val)
+		}
+	}
+}
+
+func BenchmarkStatistics_BulkLoad(b *testing.B) {
+	data, _ := loadTestData()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		stats := new(Statistics)
+		stats.Update(data...)
+	}
+}
