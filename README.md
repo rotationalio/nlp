@@ -47,6 +47,8 @@ Please see the documentation comments within the code for more information on ho
 * Vectors & vectorization
   * One-hot encoding
   * Frequency (count) encoding
+* Descriptive statistics (minimum, maximum, mean, stddev, variance, etc.)
+  * See the stats package [README.md](./pkg/stats/README.md) for more information
 
 ### Planned
 
