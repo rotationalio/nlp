@@ -1,40 +1,48 @@
 package stats
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	benchMu   sync.Once
+	benchData []time.Duration
+	benchErr  error
+)
+
+const (
+	benchSeed = 256
+	benchN    = 1000000
+	benchNs   = 10000
+	benchMean = 120 * time.Millisecond
+	benchStd  = 17 * time.Millisecond
+)
+
 func loadBenchData() ([]time.Duration, error) {
-	data := make([]time.Duration, 0, 1000000)
+	benchMu.Do(func() {
+		source := rand.NewSource(benchSeed)
+		r := rand.New(source)
 
-	f, err := os.Open("testdata/latencies.txt")
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	buf := bufio.NewScanner(f)
-	for buf.Scan() {
-		var val time.Duration
-		if val, err = time.ParseDuration(buf.Text()); err != nil {
-			return nil, err
+		var n int
+		if testing.Short() {
+			n = benchNs
+		} else {
+			n = benchN
 		}
-		data = append(data, val)
-	}
 
-	if buf.Err() != nil {
-		return nil, err
-	}
-
-	return data, nil
+		benchData = make([]time.Duration, n)
+		for i := 0; i < n; i++ {
+			benchData[i] = benchMean + time.Duration(r.NormFloat64()*float64(benchStd)) // nolint:gosec
+		}
+	})
+	return benchData, benchErr
 }
 
 func ExampleBenchmark() {
@@ -50,16 +58,16 @@ func ExampleBenchmark() {
 	// Output:
 	// {
 	//   "duration": "0s",
-	//   "fastest": "41.219436ms",
-	//   "mean": "120.993689ms",
-	//   "range": "167.175236ms",
+	//   "fastest": "37.762942ms",
+	//   "mean": "120.015029ms",
+	//   "range": "160.840413ms",
 	//   "samples": 1000000,
-	//   "slowest": "208.394672ms",
-	//   "stddev": "17.283562ms",
-	//   "throughput": 8.264893850648656,
+	//   "slowest": "198.603355ms",
+	//   "stddev": "17.004806ms",
+	//   "throughput": 8.332289735296195,
 	//   "timeouts": 0,
-	//   "total": "33h36m33.689461785s",
-	//   "variance": "298.721µs"
+	//   "total": "33h20m15.029693929s",
+	//   "variance": "289.163µs"
 	// }
 }
 
@@ -74,12 +82,12 @@ func TestBenchmark(t *testing.T) {
 		stats.Update(v)
 	}
 
-	require.Equal(t, time.Duration(120993689), stats.Mean())
-	require.Equal(t, time.Duration(17283562), stats.StdDev())
-	require.Equal(t, time.Duration(298721), stats.Variance())
-	require.Equal(t, time.Duration(208394672), stats.Slowest())
-	require.Equal(t, time.Duration(41219436), stats.Fastest())
-	require.Equal(t, time.Duration(167175236), stats.Range())
+	require.Equal(t, time.Duration(120015029), stats.Mean())
+	require.Equal(t, time.Duration(17004806), stats.StdDev())
+	require.Equal(t, time.Duration(289163), stats.Variance())
+	require.Equal(t, time.Duration(198603355), stats.Slowest())
+	require.Equal(t, time.Duration(37762942), stats.Fastest())
+	require.Equal(t, time.Duration(160840413), stats.Range())
 }
 
 func TestBenchmarkBulk(t *testing.T) {
@@ -90,12 +98,12 @@ func TestBenchmarkBulk(t *testing.T) {
 	stats := new(Benchmark)
 	stats.Update(data...)
 
-	require.Equal(t, time.Duration(120993689), stats.Mean())
-	require.Equal(t, time.Duration(17283562), stats.StdDev())
-	require.Equal(t, time.Duration(298721), stats.Variance())
-	require.Equal(t, time.Duration(208394672), stats.Slowest())
-	require.Equal(t, time.Duration(41219436), stats.Fastest())
-	require.Equal(t, time.Duration(167175236), stats.Range())
+	require.Equal(t, time.Duration(120015029), stats.Mean())
+	require.Equal(t, time.Duration(17004806), stats.StdDev())
+	require.Equal(t, time.Duration(289163), stats.Variance())
+	require.Equal(t, time.Duration(198603355), stats.Slowest())
+	require.Equal(t, time.Duration(37762942), stats.Fastest())
+	require.Equal(t, time.Duration(160840413), stats.Range())
 }
 
 func TestThroughput(t *testing.T) {

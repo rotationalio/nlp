@@ -1,12 +1,10 @@
 package stats
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
-	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,29 +13,36 @@ import (
 // The default delta value when using [require.InDelta]
 const DEFAULT_DELTA = 1e-12
 
+var (
+	dataMu   sync.Once
+	testData []float64
+	testErr  error
+)
+
+const (
+	testSeed = 512
+	testN    = 1000000
+	testNs   = 10000
+)
+
 func loadTestData() ([]float64, error) {
-	data := make([]float64, 0, 1000000)
+	dataMu.Do(func() {
+		source := rand.NewSource(testSeed)
+		r := rand.New(source)
 
-	f, err := os.Open("testdata/standardized.txt")
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	buf := bufio.NewScanner(f)
-	for buf.Scan() {
-		var val float64
-		if val, err = strconv.ParseFloat(buf.Text(), 64); err != nil {
-			return nil, err
+		var n int
+		if testing.Short() {
+			n = testNs
+		} else {
+			n = testN
 		}
-		data = append(data, val)
-	}
 
-	if buf.Err() != nil {
-		return nil, err
-	}
-
-	return data, nil
+		testData = make([]float64, n)
+		for i := 0; i < n; i++ {
+			testData[i] = r.NormFloat64() // nolint:gosec
+		}
+	})
+	return testData, testErr
 }
 
 func ExampleStatistics() {
@@ -52,14 +57,14 @@ func ExampleStatistics() {
 	fmt.Println(string(data))
 	// Output:
 	// {
-	//   "maximum": 5.30507026071,
-	//   "mean": 0.00041124313405184064,
-	//   "minimum": -4.72206033824,
-	//   "range": 10.02713059895,
+	//   "maximum": 4.68334707355854,
+	//   "mean": -0.0009190805164398931,
+	//   "minimum": -4.769677332279344,
+	//   "range": 9.453024405837883,
 	//   "samples": 1000000,
-	//   "stddev": 0.9988808397330513,
-	//   "total": 411.2431340518406,
-	//   "variance": 0.9977629319858057
+	//   "stddev": 1.0003036264147471,
+	//   "total": -919.0805164398931,
+	//   "variance": 1.000607345018494
 	// }
 }
 
@@ -75,12 +80,12 @@ func TestStatistics(t *testing.T) {
 	}
 
 	require.Equal(t, uint64(1000000), stats.N())
-	require.InDelta(t, 0.00041124313405184064, stats.Mean(), DEFAULT_DELTA)
-	require.InDelta(t, 0.9988808397330513, stats.StdDev(), DEFAULT_DELTA)
-	require.InDelta(t, 0.9977629319858057, stats.Variance(), DEFAULT_DELTA)
-	require.InDelta(t, 5.30507026071, stats.Maximum(), DEFAULT_DELTA)
-	require.InDelta(t, -4.7220603382400004, stats.Minimum(), DEFAULT_DELTA)
-	require.InDelta(t, 10.02713059895, stats.Range(), DEFAULT_DELTA)
+	require.InDelta(t, -0.0009190805164398931, stats.Mean(), DEFAULT_DELTA)
+	require.InDelta(t, 1.0003036264147471, stats.StdDev(), DEFAULT_DELTA)
+	require.InDelta(t, 1.000607345018494, stats.Variance(), DEFAULT_DELTA)
+	require.InDelta(t, 4.68334707355854, stats.Maximum(), DEFAULT_DELTA)
+	require.InDelta(t, -4.769677332279344, stats.Minimum(), DEFAULT_DELTA)
+	require.InDelta(t, 9.453024405837883, stats.Range(), DEFAULT_DELTA)
 }
 
 func TestStatisticsBulk(t *testing.T) {
@@ -92,12 +97,12 @@ func TestStatisticsBulk(t *testing.T) {
 	stats.Update(data...)
 
 	require.Equal(t, uint64(1000000), stats.N())
-	require.InDelta(t, 0.00041124313405184064, stats.Mean(), DEFAULT_DELTA)
-	require.InDelta(t, 0.9988808397330513, stats.StdDev(), DEFAULT_DELTA)
-	require.InDelta(t, 0.9977629319858057, stats.Variance(), DEFAULT_DELTA)
-	require.InDelta(t, 5.30507026071, stats.Maximum(), DEFAULT_DELTA)
-	require.InDelta(t, -4.7220603382400004, stats.Minimum(), DEFAULT_DELTA)
-	require.InDelta(t, 10.02713059895, stats.Range(), DEFAULT_DELTA)
+	require.InDelta(t, -0.0009190805164398931, stats.Mean(), DEFAULT_DELTA)
+	require.InDelta(t, 1.0003036264147471, stats.StdDev(), DEFAULT_DELTA)
+	require.InDelta(t, 1.000607345018494, stats.Variance(), DEFAULT_DELTA)
+	require.InDelta(t, 4.68334707355854, stats.Maximum(), DEFAULT_DELTA)
+	require.InDelta(t, -4.769677332279344, stats.Minimum(), DEFAULT_DELTA)
+	require.InDelta(t, 9.453024405837883, stats.Range(), DEFAULT_DELTA)
 }
 
 func TestStatisticsAppend(t *testing.T) {
