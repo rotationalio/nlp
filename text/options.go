@@ -1,9 +1,9 @@
 package text
 
 import (
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/stem"
-	"go.rtnl.ai/nlp/pkg/tokenize"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/stem"
+	"go.rtnl.ai/nlp/tokenize"
 )
 
 // An [Option] configures a [Text] in [New].

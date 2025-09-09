@@ -3,8 +3,8 @@ package vector
 import (
 	"math"
 
-	"go.rtnl.ai/nlp/pkg/errors"
-	"go.rtnl.ai/nlp/pkg/mathematics"
+	"go.rtnl.ai/nlp/errors"
+	"go.rtnl.ai/nlp/mathematics"
 )
 
 // Cosine returns the cosine of the angle between two vectors as a value between

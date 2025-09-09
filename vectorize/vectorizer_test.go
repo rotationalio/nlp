@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/stem"
-	"go.rtnl.ai/nlp/pkg/tokenize"
-	"go.rtnl.ai/nlp/pkg/vector"
-	"go.rtnl.ai/nlp/pkg/vectorize"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/stem"
+	"go.rtnl.ai/nlp/tokenize"
+	"go.rtnl.ai/nlp/vector"
+	"go.rtnl.ai/nlp/vectorize"
 )
 
 func TestNewCountVectorizer(t *testing.T) {

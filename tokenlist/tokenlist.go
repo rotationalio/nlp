@@ -23,8 +23,8 @@ Usage:
 package tokenlist
 
 import (
-	"go.rtnl.ai/nlp/pkg/errors"
-	"go.rtnl.ai/nlp/pkg/token"
+	"go.rtnl.ai/nlp/errors"
+	"go.rtnl.ai/nlp/token"
 )
 
 // A list of [token.Token].

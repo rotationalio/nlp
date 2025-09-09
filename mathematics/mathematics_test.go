@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/mathematics"
+	"go.rtnl.ai/nlp/mathematics"
 )
 
 func TestBoundToRange(t *testing.T) {

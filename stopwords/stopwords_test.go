@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/stopwords"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/stopwords"
 )
 
 func TestIsStopWordEnglish(t *testing.T) {

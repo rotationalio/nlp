@@ -48,7 +48,7 @@ See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
   * One-hot encoding
   * Frequency (count) encoding
 * Descriptive statistics (minimum, maximum, mean, stddev, variance, etc.)
-  * See the stats package [README.md](./pkg/stats/README.md) for more information
+  * See the stats package [README.md](./stats/README.md) for more information
 
 ### Planned
 

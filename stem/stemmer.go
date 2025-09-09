@@ -1,8 +1,8 @@
 package stem
 
 import (
-	"go.rtnl.ai/nlp/pkg/errors"
-	"go.rtnl.ai/nlp/pkg/language"
+	"go.rtnl.ai/nlp/errors"
+	"go.rtnl.ai/nlp/language"
 )
 
 // ############################################################################

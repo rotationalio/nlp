@@ -1,11 +1,11 @@
 package similarity
 
 import (
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/mathematics"
-	"go.rtnl.ai/nlp/pkg/tokenize"
-	"go.rtnl.ai/nlp/pkg/vector"
-	"go.rtnl.ai/nlp/pkg/vectorize"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/mathematics"
+	"go.rtnl.ai/nlp/tokenize"
+	"go.rtnl.ai/nlp/vector"
+	"go.rtnl.ai/nlp/vectorize"
 )
 
 // ############################################################################

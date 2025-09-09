@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"go.rtnl.ai/nlp/pkg/language"
+	"go.rtnl.ai/nlp/language"
 )
 
 // ############################################################################

@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/stem"
-	"go.rtnl.ai/nlp/pkg/text"
-	"go.rtnl.ai/nlp/pkg/tokenize"
-	"go.rtnl.ai/nlp/pkg/tokenlist"
-	"go.rtnl.ai/nlp/pkg/vector"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/stem"
+	"go.rtnl.ai/nlp/text"
+	"go.rtnl.ai/nlp/tokenize"
+	"go.rtnl.ai/nlp/tokenlist"
+	"go.rtnl.ai/nlp/vector"
 )
 
 func TestNew(t *testing.T) {

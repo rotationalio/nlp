@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/stem"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/stem"
 )
 
 // ############################################################################

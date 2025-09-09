@@ -1,11 +1,11 @@
 package vectorize
 
 import (
-	"go.rtnl.ai/nlp/pkg/errors"
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/stem"
-	"go.rtnl.ai/nlp/pkg/tokenize"
-	"go.rtnl.ai/nlp/pkg/vector"
+	"go.rtnl.ai/nlp/errors"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/stem"
+	"go.rtnl.ai/nlp/tokenize"
+	"go.rtnl.ai/nlp/vector"
 )
 
 // ############################################################################

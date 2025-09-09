@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/pkg/errors"
-	"go.rtnl.ai/nlp/pkg/vector"
+	"go.rtnl.ai/nlp/errors"
+	"go.rtnl.ai/nlp/vector"
 )
 
 func TestCosine(t *testing.T) {

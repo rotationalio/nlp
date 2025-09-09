@@ -60,14 +60,14 @@ package text
 import (
 	"unicode/utf8"
 
-	"go.rtnl.ai/nlp/pkg/language"
-	"go.rtnl.ai/nlp/pkg/similarity"
-	"go.rtnl.ai/nlp/pkg/stem"
-	"go.rtnl.ai/nlp/pkg/token"
-	"go.rtnl.ai/nlp/pkg/tokenize"
-	"go.rtnl.ai/nlp/pkg/tokenlist"
-	"go.rtnl.ai/nlp/pkg/vector"
-	"go.rtnl.ai/nlp/pkg/vectorize"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/similarity"
+	"go.rtnl.ai/nlp/stem"
+	"go.rtnl.ai/nlp/token"
+	"go.rtnl.ai/nlp/tokenize"
+	"go.rtnl.ai/nlp/tokenlist"
+	"go.rtnl.ai/nlp/vector"
+	"go.rtnl.ai/nlp/vectorize"
 )
 
 // A one-stop-shop for performing NLP operations on a string of text, such as
