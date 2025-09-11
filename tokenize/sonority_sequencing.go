@@ -8,13 +8,13 @@ import (
 	"go.rtnl.ai/nlp/pkg/errors"
 )
 
-// Word syllable tokenizer that uses Sonority Sequencing Principle (SSP).
-//
 // ###############################################################################
 // This Sonority Sequencing Principle (SSP) algorithm code has been ported to
 // Go under the terms of the NLTK Project's Apache 2.0 license using the Python
 // implementation described at https://github.com/nltk/nltk
 // ###############################################################################
+
+// Word syllable tokenizer that uses Sonority Sequencing Principle (SSP).
 type SSPSyllableTokenizer struct {
 	lang         enum.Language
 	runeScoreMap map[rune]int8
@@ -24,12 +24,6 @@ type SSPSyllableTokenizer struct {
 // Returns a new [SSPSyllableTokenizer] configured for the [language.Language]
 // provided. If the language is unsupported, it will return
 // [errors.ErrLanguageNotSupported].
-//
-// ###############################################################################
-// This Sonority Sequencing Principle (SSP) algorithm code has been ported to
-// Go under the terms of the NLTK Project's Apache 2.0 license using the Python
-// implementation described at https://github.com/nltk/nltk
-// ###############################################################################
 func NewSSPSyllableTokenizer(lang enum.Language) (*SSPSyllableTokenizer, error) {
 	switch lang {
 	case enum.LanguageEnglish:
@@ -48,12 +42,6 @@ func NewSSPSyllableTokenizer(lang enum.Language) (*SSPSyllableTokenizer, error) 
 }
 
 // Returns the word syllables for the [token.Token].
-//
-// ###############################################################################
-// This Sonority Sequencing Principle (SSP) algorithm code has been ported to
-// Go under the terms of the NLTK Project's Apache 2.0 license using the Python
-// implementation described at https://github.com/nltk/nltk
-// ###############################################################################
 func (t *SSPSyllableTokenizer) Tokenize(token Token) (syllables []string) {
 	// Get trigrams for the token
 	runeToken := []rune(token.Token)
@@ -105,12 +93,6 @@ func (t *SSPSyllableTokenizer) Tokenize(token Token) (syllables []string) {
 
 // Ensures all syllables have a vowel by appending syllables without vowels to
 // the previous syllable.
-//
-// ###############################################################################
-// This Sonority Sequencing Principle (SSP) algorithm code has been ported to
-// Go under the terms of the NLTK Project's Apache 2.0 license using the Python
-// implementation described at https://github.com/nltk/nltk
-// ###############################################################################
 func (t *SSPSyllableTokenizer) validateSyllables(syllables []string) (validatedSyllables []string) {
 	// If there is 0 or 1 syllables return immediately
 	if len(syllables) <= 1 {
