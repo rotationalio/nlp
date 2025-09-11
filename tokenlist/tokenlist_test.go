@@ -36,49 +36,45 @@ func TestNewEmpty(t *testing.T) {
 	}
 	for _, tc := range testcases {
 		tl := tokenlist.NewEmpty(tc.Size, tc.Cap)
-		require.Equal(t, tc.Size, len(tl.Tokens()))
-		require.Equal(t, tc.ExpCap, cap(tl.Tokens()))
+		require.Equal(t, tc.Size, len(tl))
+		require.Equal(t, tc.ExpCap, cap(tl))
 		// require all tokens to be the empty string
-		for _, tok := range tl.Tokens() {
+		for _, tok := range tl {
 			require.Equal(t, token.New(""), tok)
 		}
 	}
 }
 
-func TestAppend(t *testing.T) {
-	tl := tokenlist.NewEmpty(0, 0)
-	require.Len(t, tl.Tokens(), 0)
+// Tests that the docs for [tokenlist.New] work properly
+func TestNewDocs(t *testing.T) {
+	// Create a new [TokenList] from a slice of strings
+	items := []string{"apple", "bananna", "zebra"}
+	myTokens := tokenlist.New(items)
 
-	expected := token.New("one")
-	tl.Append(expected)
-	require.Len(t, tl.Tokens(), 1)
+	// You can get a slice of strings back
+	stringTokens := myTokens.Strings() // []string
+	require.Equal(t, items, stringTokens)
 
-	token := tl.Tokens()[0]
-	require.Equal(t, expected, token)
+	// You can get a new [TokenList] as a copy of another list
+	aCopy := tokenlist.NewCopy(myTokens) // TokenList (copy of myTokens)
+	require.Equal(t, myTokens, aCopy)
 
-	tl.Append(expected)
-	require.Len(t, tl.Tokens(), 2)
+	// You can get an empty [TokenList] with a specific size and capacity
+	emptyTokens := tokenlist.NewEmpty(0, 100) // TokenList (with no entries)
+	require.Len(t, emptyTokens, 0)
+	require.Equal(t, 100, cap(emptyTokens))
+	emptyTokens = tokenlist.NewEmpty(10, 100) // TokenList (with 10 null string tokens)
+	require.Len(t, emptyTokens, 10)
+	require.Equal(t, 100, cap(emptyTokens))
+	emptyTokens = tokenlist.NewEmpty(10, 5) // TokenList (capacity will be set to 10)
+	require.Len(t, emptyTokens, 10)
+	require.Equal(t, 10, cap(emptyTokens))
 
-	token = tl.Tokens()[1]
-	require.Equal(t, expected, token)
-}
-
-func TestReplace(t *testing.T) {
-	tl := tokenlist.New([]string{"one", "two", "three"})
-	require.Equal(t, 3, tl.Len())
-
-	err := tl.Replace(1, token.New("replacement"))
-	require.NoError(t, err)
-	require.Equal(t, []string{"one", "replacement", "three"}, tl.Strings())
-}
-
-func TestLen(t *testing.T) {
-	tl := tokenlist.NewEmpty(0, 0)
-	require.Len(t, tl.Tokens(), 0)
-	require.Equal(t, 0, tl.Len())
-
-	expected := token.New("one")
-	tl.Append(expected)
-	require.Len(t, tl.Tokens(), 1)
-	require.Equal(t, 1, tl.Len())
+	// You can also use regular slice functions and operations on a [TokenList]
+	length := len(myTokens) // 3
+	require.Equal(t, 3, length)
+	myTokens = append(myTokens, myTokens[0]) // "apple", "bananna", "zebra", "apple"
+	require.Equal(t, []string{"apple", "bananna", "zebra", "apple"}, myTokens.Strings())
+	myTokens[0] = myTokens[1] // "bananna", "bananna", "zebra"
+	require.Equal(t, []string{"bananna", "bananna", "zebra", "apple"}, myTokens.Strings())
 }
