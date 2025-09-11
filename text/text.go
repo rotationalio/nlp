@@ -1,60 +1,3 @@
-/*
-[Text] is a one-stop shop for performing NLP operations on text.
-
-Usage example:
-
-	// Create a [Text] with the default settings
-	myText := text.New("apple aardvarks zebra bananna aardvark")
-
-	// Get all of the word tokens (ignoring errors in this example)
-	myTokens, _ := myText.Tokens() // TokenList
-
-	// Get all word stem tokens which use the same underlying types as the full
-	// word tokens above (ignoring errors in this example)
-	myStems, _ := myText.Stems() // TokenList
-
-	// The stems are 1:1 count with the tokens
-	if myTokens.Len() != myStems.Len() { // 5 == 5
-		panic("this should never occur")
-	}
-
-	// You can also get a type count, which returns the count of each unique
-	// word stem (ignoring errors) ("aardvark" has a 2 count for this example)
-	myCount, _ := myText.TypeCount() // map[string]int
-
-	// These are a [tokenlist.TokenList], but if you need a slice of strings...
-	stringTokens := myTokens.Strings() // []string
-
-	// Or to get the tokens as a slice of [token.Token] instead
-	tokenSlice := myTokens.Tokens() // []Token
-
-	// Get an individual token
-	firstToken := tokenSlice[0] // Token
-
-	// You can also get a token as another type
-	stringToken := firstToken.String() // string
-	runeToken := firstToken.Runes()    // []rune
-	byteToken := firstToken.Bytes()    // []byte
-
-	// For these examples, we need to re-create the [Text] with a vocabulary,
-	// so the [vectorize.CountVectorizer] will work without an error to get
-	// cosine similarity.
-	myText := text.New(
-	    "cars have engines",
-	    text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
-	)
-	otherText, _ := text.New(
-		"engines go with transmissions",
-	    text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
-	)
-
-	// Cosine similarity with another string
-	similarity, _ := myText.CosineSimilarity() // float64 in range [-1.0, 1.0]
-
-	// We can also get a one-hot or frequency vectorization of our text
-	myOneHotVector, _ := myText.VectorizeOneHot()
-	myFrequencyVector, _ := myText.VectorizeFrequency()
-*/
 package text
 
 import (
@@ -70,8 +13,65 @@ import (
 	"go.rtnl.ai/nlp/vectorize"
 )
 
-// A one-stop-shop for performing NLP operations on a string of text, such as
-// tokenization, stemming, vectorization, etc.
+/*
+[Text] is a one-stop shop for performing NLP operations on text.
+
+Usage example:
+
+	// Create a [Text] with the default settings
+	myText, err := text.New("apple aardvarks zebra bananna aardvark")
+
+	// Get all of the word tokens
+	myTokens, err := myText.Tokens() // TokenList
+
+	// Get all word stem tokens which use the same underlying types as the full
+	// word tokens above (ignoring errors in this example)
+	myStems, err := myText.Stems() // TokenList
+
+	// The stems are 1:1 count with the tokens
+	if len(myTokens) != len(myStems) { // 5 == 5
+		panic("this should never occur")
+	}
+
+	// You can also get a type count, which returns the count of each unique
+	// word stem (ignoring errors) ("aardvark" has a 2 count for this example)
+	myCount, err := myText.TypeCount() // map[string]int
+
+	// These are a [tokenlist.TokenList], but if you need a slice of strings...
+	stringTokens := myTokens.Strings() // []string
+
+	// You can also use regular slice functions and operations on a [tokenlist.TokenList]
+	length := len(myTokens) // 5
+	myTokens = append(myTokens, myTokens[0]) // "apple", "aardvarks", "zebra", "bananna", "aardvark", "apple"
+	myTokens[0] = myTokens[1] // "aardvarks", "aardvarks", "zebra", "bananna", "aardvark", "apple"
+
+	// Get an individual token
+	firstToken := myTokens[0] // Token
+
+	// You can also get a token as another type
+	stringToken := firstToken.String() // string
+	runeToken := firstToken.Runes() // []rune
+	byteToken := firstToken.Bytes() // []byte
+
+	// For these examples, we need to re-create the [Text] with a vocabulary,
+	// so the [vectorize.CountVectorizer] will work without an error to get
+	// cosine similarity. You could also use a different vectorization method.
+	myText, err = text.New(
+		"cars have engines like motorcycles have engines",
+		text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+	)
+	otherText, err := text.New(
+		"engines are attached to transmissions",
+		text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+	)
+
+	// Cosine similarity with another string
+	similarity, err := myText.CosineSimilarity(otherText) // ~0.5
+
+	// We can also get a one-hot or frequency vectorization of our text
+	myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
+	myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+*/
 type Text struct {
 	// The string representation of the text
 	text string
@@ -97,12 +97,13 @@ type Text struct {
 	// Caching (lazy initialization)
 	// ==============================
 
-	tokens    *tokenlist.TokenList
-	stems     *tokenlist.TokenList
+	tokens    tokenlist.TokenList
+	stems     tokenlist.TokenList
 	typecount map[string]int
 }
 
-// Create a new [Text] from the input string with the specified [Option]s.
+// Create a new [Text] from the input string with the specified [Option]s. See
+// the [Text]s docstring for examples of how to use it.
 //
 // Defaults:
 //   - Vocabulary (use [WithVocabulary]): nil (errors will be returned from certain functions if a vocabulary is not added)
@@ -181,7 +182,7 @@ func New(t string, options ...Option) (text *Text, err error) {
 // Returns a [tokenlist.TokenList] for the [Text]s tokens using the configured
 // [tokenize.Tokenizer]. This function cache the result of the operation for
 // subsequent calls.
-func (t *Text) Tokens() (tokens *tokenlist.TokenList, err error) {
+func (t *Text) Tokens() (tokens tokenlist.TokenList, err error) {
 	if t.tokens == nil {
 		var toks []string
 		if toks, err = t.tokenizer.Tokenize(t.text); err != nil {
@@ -195,18 +196,18 @@ func (t *Text) Tokens() (tokens *tokenlist.TokenList, err error) {
 // Returns a [tokenlist.TokenList] for the [Text]s stems using the configured
 // [stem.Stemmer]. This function cache the result of the operation for
 // subsequent calls.
-func (t *Text) Stems() (stems *tokenlist.TokenList, err error) {
+func (t *Text) Stems() (stems tokenlist.TokenList, err error) {
 	if t.stems == nil {
 		// Initialize the stems with the tokens
-		var tokens *tokenlist.TokenList
+		var tokens tokenlist.TokenList
 		if tokens, err = t.Tokens(); err != nil {
 			return nil, err
 		}
 		t.stems = tokenlist.NewCopy(tokens)
 
 		// Perform stemming by replacing each token with it's stem
-		for i, tok := range t.stems.Tokens() {
-			t.stems.Replace(i, token.New(t.stemmer.Stem(tok.String())))
+		for i, tok := range t.stems {
+			t.stems[i] = token.New(t.stemmer.Stem(tok.String()))
 		}
 	}
 	return t.stems, nil
@@ -217,7 +218,7 @@ func (t *Text) Stems() (stems *tokenlist.TokenList, err error) {
 func (t *Text) TypeCount() (types map[string]int, err error) {
 	if t.typecount == nil {
 		// Stem the words
-		var stems *tokenlist.TokenList
+		var stems tokenlist.TokenList
 		if stems, err = t.Stems(); err != nil {
 			return nil, err
 		}
@@ -229,12 +230,12 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 }
 
 // Returns the raw cache value for this [Text]s tokens.
-func (t *Text) TokensCache() (tokens *tokenlist.TokenList) {
+func (t *Text) TokensCache() (tokens tokenlist.TokenList) {
 	return t.tokens
 }
 
 // Returns the raw cache value for this [Text]s stems.
-func (t *Text) StemsCache() (stems *tokenlist.TokenList) {
+func (t *Text) StemsCache() (stems tokenlist.TokenList) {
 	return t.stems
 }
 

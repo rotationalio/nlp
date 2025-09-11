@@ -45,9 +45,11 @@ func TestNewEmpty(t *testing.T) {
 	}
 }
 
-// Tests that the docs for [tokenlist.New] work properly
+// Tests that the docstring for [tokenlist.New] work properly; if this ever fails
+// please fix it and then copy the lines that do not have the 'require' checks
+// into that functions docstring.
 func TestNewDocs(t *testing.T) {
-	// Create a new [TokenList] from a slice of strings
+	// Create a new [tokenlist.TokenList] from a slice of strings
 	items := []string{"apple", "bananna", "zebra"}
 	myTokens := tokenlist.New(items)
 
@@ -55,11 +57,11 @@ func TestNewDocs(t *testing.T) {
 	stringTokens := myTokens.Strings() // []string
 	require.Equal(t, items, stringTokens)
 
-	// You can get a new [TokenList] as a copy of another list
+	// You can get a new [tokenlist.TokenList] as a copy of another list
 	aCopy := tokenlist.NewCopy(myTokens) // TokenList (copy of myTokens)
 	require.Equal(t, myTokens, aCopy)
 
-	// You can get an empty [TokenList] with a specific size and capacity
+	// You can get an empty [tokenlist.TokenList] with a specific size and capacity
 	emptyTokens := tokenlist.NewEmpty(0, 100) // TokenList (with no entries)
 	require.Len(t, emptyTokens, 0)
 	require.Equal(t, 100, cap(emptyTokens))
@@ -70,7 +72,7 @@ func TestNewDocs(t *testing.T) {
 	require.Len(t, emptyTokens, 10)
 	require.Equal(t, 10, cap(emptyTokens))
 
-	// You can also use regular slice functions and operations on a [TokenList]
+	// You can also use regular slice functions and operations on a [tokenlist.TokenList]
 	length := len(myTokens) // 3
 	require.Equal(t, 3, length)
 	myTokens = append(myTokens, myTokens[0]) // "apple", "bananna", "zebra", "apple"

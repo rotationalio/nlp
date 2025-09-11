@@ -1,3 +1,14 @@
+package token
+
+import (
+	"unicode/utf8"
+)
+
+// A single word token.
+type Token struct {
+	token string
+}
+
 /*
 [Token] is used for word tokens, word stem tokens, etc.
 
@@ -15,18 +26,6 @@ Usage example:
 	runeCount := token.Len() // 9 for "aadrdvarks"
 	byteCount := token.ByteLen() // acts like the len() function
 */
-package token
-
-import (
-	"unicode/utf8"
-)
-
-// A single word token.
-type Token struct {
-	token string
-}
-
-// Returns a new [Token] from a string.
 func New(token string) Token {
 	return Token{
 		token: token,

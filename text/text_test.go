@@ -165,3 +165,91 @@ func TestCosineSimilarity(t *testing.T) {
 	require.NoError(t, err)
 	require.InDelta(t, expected, similarity, 1e-12)
 }
+
+// Tests that the docstring for [text.Text] work properly; if this ever fails
+// please fix it and then copy the lines that do not have the 'require' checks
+// into that functions docstring.
+func TestTextDocs(t *testing.T) {
+	// Create a [text.Text] with the default settings
+	myText, err := text.New("apple aardvarks zebra bananna aardvark")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	// Get all of the word tokens
+	myTokens, err := myText.Tokens() // TokenList
+	require.NoError(t, err)
+	require.NotNil(t, myTokens)
+	require.Len(t, myTokens, 5)
+
+	// Get all word stem tokens which use the same underlying types as the full
+	// word tokens above (ignoring errors in this example)
+	myStems, err := myText.Stems() // TokenList
+	require.NoError(t, err)
+	require.NotNil(t, myStems)
+	require.Len(t, myStems, 5)
+
+	// The stems are 1:1 count with the tokens
+	if len(myTokens) != len(myStems) { // 5 == 5
+		panic("this should never occur")
+	}
+
+	// You can also get a type count, which returns the count of each unique
+	// word stem (ignoring errors) ("aardvark" has a 2 count for this example)
+	myCount, err := myText.TypeCount() // map[string]int
+	require.NoError(t, err)
+	require.NotNil(t, myCount)
+	require.Equal(t, 2, myCount["aardvark"])
+
+	// These are a [tokenlist.TokenList], but if you need a slice of strings...
+	stringTokens := myTokens.Strings() // []string
+	require.Equal(t, []string{"apple", "aardvarks", "zebra", "bananna", "aardvark"}, stringTokens)
+
+	// You can also use regular slice functions and operations on a [tokenlist.TokenList]
+	length := len(myTokens) // 5
+	require.Equal(t, 5, length)
+	myTokens = append(myTokens, myTokens[0]) // "apple", "aardvarks", "zebra", "bananna", "aardvark", "apple"
+	require.Equal(t, []string{"apple", "aardvarks", "zebra", "bananna", "aardvark", "apple"}, myTokens.Strings())
+	myTokens[0] = myTokens[1] // "aardvarks", "aardvarks", "zebra", "bananna", "aardvark", "apple"
+	require.Equal(t, []string{"aardvarks", "aardvarks", "zebra", "bananna", "aardvark", "apple"}, myTokens.Strings())
+
+	// Get an individual token
+	firstToken := myTokens[0] // Token
+	require.Equal(t, "aardvarks", firstToken.String())
+
+	// You can also get a token as another type
+	stringToken := firstToken.String() // string
+	require.Equal(t, stringToken, "aardvarks")
+	runeToken := firstToken.Runes() // []rune
+	require.Equal(t, runeToken, []rune("aardvarks"))
+	byteToken := firstToken.Bytes() // []byte
+	require.Equal(t, byteToken, []byte("aardvarks"))
+
+	// For these examples, we need to re-create the [text.Text] with a vocabulary,
+	// so the [vectorize.CountVectorizer] will work without an error to get
+	// cosine similarity.
+	myText, err = text.New(
+		"cars have engines like motorcycles have engines",
+		text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+	otherText, err := text.New(
+		"engines are attached to transmissions",
+		text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, otherText)
+
+	// Cosine similarity with another string
+	similarity, err := myText.CosineSimilarity(otherText) // ~0.5
+	require.NoError(t, err)
+	require.InDelta(t, 0.5, similarity, 1e-12)
+
+	// We can also get a one-hot or frequency vectorization of our text
+	myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
+	require.NoError(t, err)
+	require.Equal(t, vector.Vector{1, 1, 0, 0}, myOneHotVector)
+	myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+	require.NoError(t, err)
+	require.Equal(t, vector.Vector{1, 2, 0, 0}, myFrequencyVector)
+}
