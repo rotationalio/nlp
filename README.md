@@ -3,6 +3,7 @@
 Natural Language Processing in Golang.
 
 GitHub: <https://github.com/rotationalio/nlp>
+Go Docs: <https://go.rtnl.ai/nlp>
 
 ## The Vision
 
@@ -28,13 +29,72 @@ We want this package to be:
 
 ## End-User API Usage
 
-TODO (sc-34050): Rewrite this section when the "Text/Blob" refactoring is complete in sc-34050
+There are two ways you can use this library:
 
-Generally, if we have an `Operation` that we want to perform on text, there will be an associated `Operation[izer|er]` type.
-The `Operation[izer|er]` may be an `interface` in the cases where we might want more than one implementation of the `Operation`, such as with the `Stemmer` interface where we have a `Porter2Stemmer` implementation.
-The `Operation[izer|er]` may alternately be a `struct` in the cases where we only need one implementation of the `Operation`, such as with the `TypeCounter` struct which does not need additional implementations.
-Each of the `Operation[izer|er]` types will have a `NewOperation[izer|er](opts ...Operation[izer|er]Option)` which allows the user to either take the default configuration of the new instance, or they can include a variable number of arguments which can modify the options for the `Operation[izer|er]` instance returned.
-Please see the documentation comments within the code for more information on how to use this library, and if anything is unclear please contact us to clarify!
+1) Use the unified `text.Text` interface (see example below) to perform all of the possible NLP operations using a single object that is configured with the specific tools you wish to use when it is created via `text.New(chunk string) *text.Text`.
+This also includes using the `token.Token` and `tokenlist.TokenList` types which have their own useful features.
+2) Use the various tools in the lower level packages such as the `stem` or the `tokenize` packages on an as-needed basis.
+These tools generally use basic Go types such as strings, ints, floats, and slices of the same.
+
+### text.Text API Example
+
+```Go
+// Create a [Text] with the default settings
+myText, err := text.New("apple aardvarks zebra bananna aardvark")
+
+// Get all of the word tokens
+myTokens, err := myText.Tokens() // TokenList
+
+// Get all word stem tokens which use the same underlying types as the full
+// word tokens above (ignoring errors in this example)
+myStems, err := myText.Stems() // TokenList
+
+// The stems are 1:1 count with the tokens
+if len(myTokens) != len(myStems) { // 5 == 5
+  panic("this should never occur")
+}
+
+// You can also get a type count, which returns the count of each unique
+// word stem (ignoring errors) ("aardvark" has a 2 count for this example)
+myCount, err := myText.TypeCount() // map[string]int
+
+// These are a [tokenlist.TokenList], but if you need a slice of strings...
+stringTokens := myTokens.Strings() // []string
+
+// You can also use regular slice functions and operations on a [tokenlist.TokenList]
+length := len(myTokens) // 5
+myTokens = append(myTokens, myTokens[0]) // "apple", "aardvarks", "zebra", "bananna", "aardvark", "apple"
+myTokens[0] = myTokens[1] // "aardvarks", "aardvarks", "zebra", "bananna", "aardvark", "apple"
+
+// Get an individual token
+firstToken := myTokens[0] // Token
+
+// You can also get a token as another type
+stringToken := firstToken.String() // string
+runeToken := firstToken.Runes() // []rune
+byteToken := firstToken.Bytes() // []byte
+
+// For these examples, we need to re-create the [Text] with a vocabulary,
+// so the [vectorize.CountVectorizer] will work without an error to get
+// cosine similarity. You could also use a different vectorization method.
+myText, err = text.New(
+  "cars have engines like motorcycles have engines",
+  text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+)
+otherText, err := text.New(
+  "engines are attached to transmissions",
+  text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
+)
+
+// Cosine similarity with another string
+similarity, err := myText.CosineSimilarity(otherText) // ~0.5
+
+// We can also get a one-hot or frequency vectorization of our text
+myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
+myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+```
+
+See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
 
 ## Features, metrics, and tools
 
@@ -48,7 +108,7 @@ Please see the documentation comments within the code for more information on ho
   * One-hot encoding
   * Frequency (count) encoding
 * Descriptive statistics (minimum, maximum, mean, stddev, variance, etc.)
-  * See the stats package [README.md](./pkg/stats/README.md) for more information
+  * See the stats package [README.md](./stats/README.md) for more information
 
 ### Planned
 
@@ -59,11 +119,12 @@ Please see the documentation comments within the code for more information on ho
 
 ## Developing in nlp
 
-Different feature categories are separated into different packages, for example we might have similarity metrics in `pkg/similarity` and text classifiers in `pkg/classifiers`.
+Different feature categories are separated into different packages, for example we might have similarity metrics in `similarity/` and text classifiers in `classifiers/`.
 If you want to add a new feature, please ensure it is placed in a package which fits the category, or create a new package if none yet exist.
 Tests should be located next to each feature, for example `similarity_tests.go` would hold the tests for `similarity.go`.
 Test data should go into the `testdata/` folder within the package where the test is located.
 Documentation should go into each function's and package's docstrings so the documentation is accessible to the user while using the library in their local IDE and also available using Go's documentation tools.
+Documentation can also be included in separate Markdown files as-needed in the `docs/` folder or in this README, such as for the `text.Text` API examples.
 Any documentation or research that isn't immediately relevant to the user in the code context should go into the `docs/` folder in the root.
 
 ## Sources and References
