@@ -6,7 +6,6 @@ import (
 
 	"go.rtnl.ai/nlp/errors"
 	"go.rtnl.ai/nlp/language"
-	"go.rtnl.ai/nlp/token"
 )
 
 // ###############################################################################
@@ -21,6 +20,9 @@ type SSPSyllableTokenizer struct {
 	runeScoreMap map[rune]int8
 	vowels       string
 }
+
+// Ensure [SSPSyllableTokenizer] meets the [Tokenizer] interface requirements.
+var _ Tokenizer = &SSPSyllableTokenizer{}
 
 // Returns a new [SSPSyllableTokenizer] configured for the [language.Language]
 // provided. If the language is unsupported, it will return
@@ -42,10 +44,10 @@ func NewSSPSyllableTokenizer(lang language.Language) (*SSPSyllableTokenizer, err
 	return nil, errors.ErrLanguageNotSupported
 }
 
-// Returns the word syllables for the [token.Token].
-func (t *SSPSyllableTokenizer) Tokenize(token token.Token) (syllables []string) {
+// Returns word syllables. ALWAYS returns nil for the error.
+func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, alwaysNil error) {
 	// Get trigrams for the token
-	runeToken := token.Runes()
+	runeToken := []rune(word)
 	syllable := []rune{runeToken[0]} // start with first rune
 	for i := 1; i < len(runeToken)-2; i++ {
 		focusRune := runeToken[i]
@@ -89,7 +91,7 @@ func (t *SSPSyllableTokenizer) Tokenize(token token.Token) (syllables []string) 
 	syllables = append(syllables, string(syllable))
 
 	// Validate and return syllables
-	return t.validateSyllables(syllables)
+	return t.validateSyllables(syllables), nil
 }
 
 // Ensures all syllables have a vowel by appending syllables without vowels to
