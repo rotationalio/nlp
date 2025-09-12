@@ -4,8 +4,9 @@ import (
 	"strings"
 	"unicode"
 
-	"go.rtnl.ai/nlp/pkg/enum"
-	"go.rtnl.ai/nlp/pkg/errors"
+	"go.rtnl.ai/nlp/errors"
+	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/token"
 )
 
 // ###############################################################################
@@ -16,7 +17,7 @@ import (
 
 // Word syllable tokenizer that uses Sonority Sequencing Principle (SSP).
 type SSPSyllableTokenizer struct {
-	lang         enum.Language
+	lang         language.Language
 	runeScoreMap map[rune]int8
 	vowels       string
 }
@@ -24,9 +25,9 @@ type SSPSyllableTokenizer struct {
 // Returns a new [SSPSyllableTokenizer] configured for the [language.Language]
 // provided. If the language is unsupported, it will return
 // [errors.ErrLanguageNotSupported].
-func NewSSPSyllableTokenizer(lang enum.Language) (*SSPSyllableTokenizer, error) {
+func NewSSPSyllableTokenizer(lang language.Language) (*SSPSyllableTokenizer, error) {
 	switch lang {
-	case enum.LanguageEnglish:
+	case language.English:
 		return &SSPSyllableTokenizer{
 			lang: lang,
 			runeScoreMap: mapRuneScores(map[int8][]rune{
@@ -42,9 +43,9 @@ func NewSSPSyllableTokenizer(lang enum.Language) (*SSPSyllableTokenizer, error) 
 }
 
 // Returns the word syllables for the [token.Token].
-func (t *SSPSyllableTokenizer) Tokenize(token Token) (syllables []string) {
+func (t *SSPSyllableTokenizer) Tokenize(token token.Token) (syllables []string) {
 	// Get trigrams for the token
-	runeToken := []rune(token.Token)
+	runeToken := token.Runes()
 	syllable := []rune{runeToken[0]} // start with first rune
 	for i := 1; i < len(runeToken)-2; i++ {
 		focusRune := runeToken[i]
