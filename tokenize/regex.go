@@ -102,5 +102,5 @@ const (
 
 	// Tokenize text by whitespace. Splits a string like [strings.Fields]
 	// would do.
-	REGEX_WHITESPACE = `\s*\S+\s*`
+	REGEX_WHITESPACE = `\S+`
 )

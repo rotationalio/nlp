@@ -1,6 +1,7 @@
 package tokenize_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -77,6 +78,13 @@ func TestRegexTokenizer(t *testing.T) {
 			},
 		},
 		{
+			Name:  "QuickBrownFoxWithSymbolsAndNumbers-REGEX_WHITESPACE",
+			Text:  "The quick brown fox jumps over the lazy fox.",
+			Regex: tokenize.REGEX_WHITESPACE,
+			// This regex should work *exactly* like [strings.Fields]
+			Expected: strings.Fields("The quick brown fox jumps over the lazy fox."),
+		},
+		{
 			Name:  "QuickBrownFoxWithSymbolsAndNumbers-REGEX_ENGLISH_WORDS",
 			Text:  "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_",
 			Regex: tokenize.REGEX_ENGLISH_WORDS,
@@ -123,6 +131,13 @@ func TestRegexTokenizer(t *testing.T) {
 				"I",
 				// does not capture the _snake_case_
 			},
+		},
+		{
+			Name:  "QuickBrownFoxWithSymbolsAndNumbers-REGEX_WHITESPACE",
+			Text:  "\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_",
+			Regex: tokenize.REGEX_WHITESPACE,
+			// This regex should work *exactly* like [strings.Fields]
+			Expected: strings.Fields("\tThe **&^$% quick% &brown$ ^fox@ %jumps!\n(over) [the] {lazy} 'fox'. 100% 99.9 F.B.I.\r\n _snake_case_"),
 		},
 	}
 
