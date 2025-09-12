@@ -13,6 +13,10 @@ import (
 	"go.rtnl.ai/nlp/vectorize"
 )
 
+// ############################################################################
+// Structure and Init
+// ############################################################################
+
 /*
 [Text] is a one-stop shop for performing NLP operations on text.
 
@@ -89,9 +93,11 @@ type Text struct {
 	// Standard Tools
 	// ==============================
 
-	typeCounter       *tokenize.TypeCounter
-	countVectorizer   *vectorize.CountVectorizer
-	cosineSimilarizer *similarity.CosineSimilarizer
+	typeCounter         *tokenize.TypeCounter
+	countVectorizer     *vectorize.CountVectorizer
+	cosineSimilarizer   *similarity.CosineSimilarizer
+	whitespaceTokenizer *tokenize.WhitespaceTokenizer
+	sentenceSegmenter   *tokenize.SentenceSegmenter
 
 	// ==============================
 	// Caching (lazy initialization)
@@ -100,6 +106,8 @@ type Text struct {
 	tokens    tokenlist.TokenList
 	stems     tokenlist.TokenList
 	typecount map[string]int
+	words     tokenlist.TokenList
+	sentences tokenlist.TokenList
 }
 
 // Create a new [Text] from the input string with the specified [Option]s. See
@@ -167,17 +175,35 @@ func New(t string, options ...Option) (text *Text, err error) {
 	}
 
 	// Initialize the [similarity.CosineSimilarizer]
-	if text.cosineSimilarizer, err = similarity.NewCosineSimilarizer(
-		similarity.CosineSimilarizerWithVocab(text.vocab),
-		similarity.CosineSimilarizerWithLanguage(text.lang),
-		similarity.CosineSimilarizerWithTokenizer(text.tokenizer),
-		similarity.CosineSimilarizerWithVectorizer(text.countVectorizer),
-	); err != nil {
-		return nil, err
+	if text.cosineSimilarizer == nil {
+		if text.cosineSimilarizer, err = similarity.NewCosineSimilarizer(
+			similarity.CosineSimilarizerWithVocab(text.vocab),
+			similarity.CosineSimilarizerWithLanguage(text.lang),
+			similarity.CosineSimilarizerWithTokenizer(text.tokenizer),
+			similarity.CosineSimilarizerWithVectorizer(text.countVectorizer),
+		); err != nil {
+			return nil, err
+		}
+	}
+
+	// Initialize the [tokenize.WhitespaceTokenizer]
+	if text.whitespaceTokenizer == nil {
+		text.whitespaceTokenizer = tokenize.NewWhitespaceTokenizer()
+	}
+
+	// Initialize the [tokenize.SentenceSegmenter]
+	if text.sentenceSegmenter == nil {
+		text.sentenceSegmenter = tokenize.NewSentenceSegmenter(
+			tokenize.SentenceSegmenterWithLanguage(text.lang),
+		)
 	}
 
 	return text, nil
 }
+
+// ############################################################################
+// Tokenize
+// ############################################################################
 
 // Returns a [tokenlist.TokenList] for the [Text]s tokens using the configured
 // [tokenize.Tokenizer]. This function cache the result of the operation for
@@ -213,6 +239,44 @@ func (t *Text) Stems() (stems tokenlist.TokenList, err error) {
 	return t.stems, nil
 }
 
+// Returns the words in the [Text] as a [tokenlist.TokenList]. Cached for faster
+// subsequent calls.
+func (t *Text) Words() tokenlist.TokenList {
+	if t.words == nil {
+		words, _ := t.whitespaceTokenizer.Tokenize(t.text) // error is ALWAYS nil
+		for _, word := range words {
+			t.words = append(t.words, token.New(word))
+		}
+	}
+	return t.words
+}
+
+// Returns the sentences in the [Text] as a [tokenlist.TokenList]. Cached for
+// faster subsequent calls.
+func (t *Text) Sentences() tokenlist.TokenList {
+	if t.sentences == nil {
+		sentences, _ := t.sentenceSegmenter.Tokenize(t.text) // error is ALWAYS nil
+		for _, sentence := range sentences {
+			t.sentences = append(t.sentences, token.New(sentence))
+		}
+	}
+	return t.sentences
+}
+
+// ############################################################################
+// Count
+// ############################################################################
+
+// Returns the count of the words in the [Text].
+func (t *Text) WordCount() int {
+	return len(t.Words()) // Words is cached
+}
+
+// Returns the count of the sentences in the [Text].
+func (t *Text) SentenceCount() int {
+	return len(t.Sentences()) // Sentences is cached
+}
+
 // Returns a map of the types (unique word stems) and their counts for this
 // [Text]. This function cache the result of the operation for subsequent calls.
 func (t *Text) TypeCount() (types map[string]int, err error) {
@@ -229,20 +293,9 @@ func (t *Text) TypeCount() (types map[string]int, err error) {
 	return t.typecount, nil
 }
 
-// Returns the raw cache value for this [Text]s tokens.
-func (t *Text) TokensCache() (tokens tokenlist.TokenList) {
-	return t.tokens
-}
-
-// Returns the raw cache value for this [Text]s stems.
-func (t *Text) StemsCache() (stems tokenlist.TokenList) {
-	return t.stems
-}
-
-// Returns the raw cache value for this [Text]s type count.
-func (t *Text) TypeCountCache() (types map[string]int) {
-	return t.typecount
-}
+// ############################################################################
+// Vectorize
+// ############################################################################
 
 // VectorizeFrequency returns a frequency (count) encoding vector for the [Text]
 // and vocabulary. The vector returned has a value of the count of word
@@ -272,7 +325,7 @@ func (t *Text) CosineSimilarity(other *Text) (similarity float64, err error) {
 }
 
 // ###########################################################################
-// Properties
+// Misc. Properties
 // ###########################################################################
 
 // Returns the number of UTF-8 runes (aka: characters) in the [Text].
@@ -342,4 +395,33 @@ func (t *Text) TypeCounter() *tokenize.TypeCounter {
 // Returns the [similarity.CosineSimilarizer] configured on this [Text].
 func (t *Text) CosineSimilarizer() *similarity.CosineSimilarizer {
 	return t.cosineSimilarizer
+}
+
+// Returns the [tokenize.SentenceSegmenter] configured on this [Text].
+func (t *Text) SentenceSegmenter() *tokenize.SentenceSegmenter {
+	return t.sentenceSegmenter
+}
+
+// Returns the [tokenize.WhitespaceTokenizer] configured on this [Text].
+func (t *Text) WhitespaceTokenizer() *tokenize.WhitespaceTokenizer {
+	return t.whitespaceTokenizer
+}
+
+// ############################################################################
+// Cache Getters
+// ############################################################################
+
+// Returns the raw cache value for this [Text]s tokens.
+func (t *Text) TokensCache() (tokens tokenlist.TokenList) {
+	return t.tokens
+}
+
+// Returns the raw cache value for this [Text]s stems.
+func (t *Text) StemsCache() (stems tokenlist.TokenList) {
+	return t.stems
+}
+
+// Returns the raw cache value for this [Text]s type count.
+func (t *Text) TypeCountCache() (types map[string]int) {
+	return t.typecount
 }
