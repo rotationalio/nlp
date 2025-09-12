@@ -84,8 +84,8 @@ func (s *SentenceSegmenter) Tokenize(chunk string) (sentences []string, alwaysNi
 // Helpers
 // ############################################################################
 
-// If the string ends in sentence punctuation and is not an abbreviation or
-// initialism or in the set of stop words then it ends a sentence.
+// Returns true if the string ends in sentence punctuation, and is not an
+// abbreviation, an initialism, or in the set of stop words.
 func endsSentence(token, punctuation string, stopWords []string) bool {
 	if token == "" {
 		return false
@@ -94,6 +94,9 @@ func endsSentence(token, punctuation string, stopWords []string) bool {
 	// True if the token ends in punctuation
 	endsInPunct := strings.LastIndexAny(token, punctuation) == len(token)-1
 
+	// True if the token ends in ellipses
+	endsInEllipses := strings.LastIndex(token, "...") == len(token)-3
+
 	// True if the word is one like 'Dr.' which usually do not end a sentence
 	// but end in sentence punctuation
 	isStopWord := slices.Contains(stopWords, token)
@@ -101,7 +104,16 @@ func endsSentence(token, punctuation string, stopWords []string) bool {
 	// True if there is more than one period such as 'Ph.D.' or 'F.B.I.'
 	isInitialism := 1 < strings.Count(token, ".")
 
-	return endsInPunct && !(isStopWord || isInitialism)
+	return endsInPunct && !(isStopWord || (isInitialism && !endsInEllipses))
+}
+
+// ############################################################################
+// Getters
+// ############################################################################
+
+// Returns the [language.Language] for the [SentenceSegmenter].
+func (s *SentenceSegmenter) Language() language.Language {
+	return s.lang
 }
 
 // ############################################################################
