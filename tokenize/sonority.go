@@ -46,9 +46,21 @@ func NewSSPSyllableTokenizer(lang language.Language) (*SSPSyllableTokenizer, err
 
 // Returns word syllables. ALWAYS returns nil for the error.
 func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, alwaysNil error) {
-	// Get trigrams for the token
 	runeToken := []rune(word)
-	syllable := []rune{runeToken[0]} // start with first rune
+
+	// Deal with words that are two characters or less
+	//
+	// NOTE: This will result in any "word" that is just two punctuation chars
+	// to be returned as a single syllable, which is a degenerative case for
+	// punctuation that we probably are fine ignoring. There is a test to ensure
+	// this behavior is recorded in a test.
+	if len(runeToken) <= 2 {
+		return []string{word}, nil
+	}
+
+	// Process runes by "trigrams", starting with the first rune being assigned
+	// to the syllable so it isn't lost
+	syllable := []rune{runeToken[0]}
 	for i := 1; i <= len(runeToken)-2; i++ {
 		focusRune := runeToken[i]
 
@@ -88,7 +100,7 @@ func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, always
 		syllable = append(syllable, focusRune)
 	}
 
-	// Append the last syllable
+	// Append the last rune and last syllable
 	syllable = append(syllable, runeToken[len(runeToken)-1])
 	syllables = append(syllables, string(syllable))
 

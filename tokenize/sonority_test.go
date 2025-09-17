@@ -52,6 +52,45 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Word:     "two words",
 			Expected: []string{"two", " ", "words"},
 		},
+		{
+			Name:     "TwoChars",
+			Language: language.English,
+			Word:     "an",
+			Expected: []string{"an"},
+		},
+		{
+			Name:     "OneChar",
+			Language: language.English,
+			Word:     "a",
+			Expected: []string{"a"},
+		},
+		{
+			Name:     "ThreePunct",
+			Language: language.English,
+			Word:     ".!?",
+			Expected: []string{".", "!", "?"},
+		},
+		{
+			// NOTE: We would normally want `{"!", "?"}`, however the
+			// implementation returns {"!?"}, which we'll accept as a
+			// degenerative case for this algorithm to make things simpler.
+			Name:     "TwoPunct_Degnerative_Case",
+			Language: language.English,
+			Word:     "!?",
+			Expected: []string{"!?"},
+		},
+		{
+			Name:     "OnePunctMan",
+			Language: language.English,
+			Word:     ".",
+			Expected: []string{"."},
+		},
+		{
+			Name:     "EmptyString",
+			Language: language.English,
+			Word:     "",
+			Expected: []string{""},
+		},
 	}
 
 	for _, tc := range testcases {
