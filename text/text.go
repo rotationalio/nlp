@@ -4,6 +4,7 @@ import (
 	"unicode/utf8"
 
 	"go.rtnl.ai/nlp/language"
+	"go.rtnl.ai/nlp/readability"
 	"go.rtnl.ai/nlp/similarity"
 	"go.rtnl.ai/nlp/stem"
 	"go.rtnl.ai/nlp/token"
@@ -300,7 +301,7 @@ func (t *Text) SentenceCount() int {
 }
 
 // Returns the count of the syllables in the [Text].
-func (t *Text) SyllablesCount() int {
+func (t *Text) SyllableCount() int {
 	count := 0
 	for _, wordSyllables := range t.Syllables() { // Syllables is cached
 		count += len(wordSyllables)
@@ -353,6 +354,22 @@ func (t *Text) VectorizeOneHot() (vector.Vector, error) {
 // returned.
 func (t *Text) CosineSimilarity(other *Text) (similarity float64, err error) {
 	return t.cosineSimilarizer.Similarity(t.text, other.text)
+}
+
+// ###########################################################################
+// Readability
+// ###########################################################################
+
+// Returns the Flesch-Kincaid Reading Ease score. Returns an [errors.ErrUndefinedValue]
+// when the sentence and/or word count is zero.
+func (t *Text) FleschKincaidReadingEase() (score float64, err error) {
+	return readability.FleschKincaidReadingEase(t.WordCount(), t.SentenceCount(), t.SyllableCount())
+}
+
+// Returns the Flesch-Kincaid grade level. Returns an [errors.ErrUndefinedValue]
+// when the sentence and/or word count is zero.
+func (t *Text) FleschKincaidGradeLevel() (score float64, err error) {
+	return readability.FleschKincaidGradeLevel(t.WordCount(), t.SentenceCount(), t.SyllableCount())
 }
 
 // ###########################################################################

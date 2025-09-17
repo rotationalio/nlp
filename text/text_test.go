@@ -167,7 +167,7 @@ func TestSyllablesAndCount(t *testing.T) {
 	actual := myText.Syllables()
 	require.Equal(t, expected, actual)
 	require.Equal(t, expected, myText.SyllablesCache())
-	require.Equal(t, 17, myText.SyllablesCount())
+	require.Equal(t, 17, myText.SyllableCount())
 }
 
 func TestTypeCount(t *testing.T) {
@@ -223,6 +223,19 @@ func TestCosineSimilarity(t *testing.T) {
 	similarity, err := myText.CosineSimilarity(otherText)
 	require.NoError(t, err)
 	require.InDelta(t, expected, similarity, 1e-12)
+}
+
+func TestFleschKincaidErrorsOnly(t *testing.T) {
+	myText, err := text.New("The cat sat on the mat.")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	// We only need to make sure that no errors or panics happen; the
+	// correctness tests are in the [readability_test] package.
+	_, err = myText.FleschKincaidReadingEase()
+	require.NoError(t, err)
+	_, err = myText.FleschKincaidGradeLevel()
+	require.NoError(t, err)
 }
 
 // Tests that the docstring for [text.Text] work properly; if this ever fails
