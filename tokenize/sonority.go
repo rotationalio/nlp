@@ -28,6 +28,9 @@ var _ Tokenizer = &SSPSyllableTokenizer{}
 // provided. If the language is unsupported, it will return
 // [errors.ErrLanguageNotSupported].
 func NewSSPSyllableTokenizer(lang language.Language) (*SSPSyllableTokenizer, error) {
+	// NOTE: we only need the lower-case OR the upper-case runes to be added
+	// to the `runeScoreMap` and `vowels` fields, and the implementation will
+	// check for both upper and lower cases in the given runes.
 	switch lang {
 	case language.English:
 		return &SSPSyllableTokenizer{
@@ -100,9 +103,9 @@ func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, always
 		syllable = append(syllable, focusRune)
 	}
 
-	// Append the last rune and last syllable
-	syllable = append(syllable, runeToken[len(runeToken)-1])
+	// Append the last syllable and last rune as syllables
 	syllables = append(syllables, string(syllable))
+	syllables = append(syllables, string(runeToken[len(runeToken)-1]))
 
 	// Validate and return syllables
 	return t.validateSyllables(syllables), nil
@@ -143,9 +146,10 @@ func (t *SSPSyllableTokenizer) validateSyllables(syllables []string) (validatedS
 			}
 		}
 
-		// If a syllable has a vowel, then add the previous syllable and set
-		// this syllable as the start of the next syllable
-		if strings.ContainsAny(syllable, t.vowels) {
+		// If a syllable has a vowel (upper or lower cases), then add the
+		// previous syllable and set this syllable as the start of the next
+		// syllable
+		if strings.ContainsAny(syllable, strings.ToLower(t.vowels)+strings.ToUpper(t.vowels)) {
 			validatedSyllables = append(validatedSyllables, currentSyllable)
 			currentSyllable = syllable
 			continue
@@ -172,7 +176,9 @@ func mapRuneScores(hierarchy map[int8][]rune) map[rune]int8 {
 	revMap := make(map[rune]int8, 0)
 	for score, runes := range hierarchy {
 		for _, r := range runes {
-			revMap[r] = score
+			// Add the lower and uppercase runes
+			revMap[unicode.ToLower(r)] = score
+			revMap[unicode.ToUpper(r)] = score
 		}
 	}
 	return revMap
