@@ -93,11 +93,12 @@ type Text struct {
 	// Standard Tools
 	// ==============================
 
-	typeCounter         *tokenize.TypeCounter
-	countVectorizer     *vectorize.CountVectorizer
-	cosineSimilarizer   *similarity.CosineSimilarizer
-	whitespaceTokenizer *tokenize.WhitespaceTokenizer
-	sentenceSegmenter   *tokenize.SentenceSegmenter
+	typeCounter          *tokenize.TypeCounter
+	countVectorizer      *vectorize.CountVectorizer
+	cosineSimilarizer    *similarity.CosineSimilarizer
+	whitespaceTokenizer  *tokenize.WhitespaceTokenizer
+	sentenceSegmenter    *tokenize.SentenceSegmenter
+	sspSyllableTokenizer *tokenize.SSPSyllableTokenizer
 
 	// ==============================
 	// Caching (lazy initialization)
@@ -108,6 +109,7 @@ type Text struct {
 	typecount map[string]int
 	words     tokenlist.TokenList
 	sentences tokenlist.TokenList
+	syllables [][]string
 }
 
 // Create a new [Text] from the input string with the specified [Option]s. See
@@ -198,6 +200,13 @@ func New(t string, options ...Option) (text *Text, err error) {
 		)
 	}
 
+	// Initialize the [tokenize.SSPSyllableTokenizer]
+	if text.sspSyllableTokenizer == nil {
+		if text.sspSyllableTokenizer, err = tokenize.NewSSPSyllableTokenizer(text.lang); err != nil {
+			return nil, err
+		}
+	}
+
 	return text, nil
 }
 
@@ -263,6 +272,19 @@ func (t *Text) Sentences() tokenlist.TokenList {
 	return t.sentences
 }
 
+// Returns the words in the [Text] tokenized as syllables as a slice of string
+// slices. Cached for faster subsequent calls.
+func (t *Text) Syllables() [][]string {
+	if t.syllables == nil {
+		t.syllables = make([][]string, 0, t.WordCount())
+		for _, word := range t.Words().Strings() {
+			wordSyllables, _ := t.sspSyllableTokenizer.Tokenize(word) // error is ALWAYS nil
+			t.syllables = append(t.syllables, wordSyllables)
+		}
+	}
+	return t.syllables
+}
+
 // ############################################################################
 // Count
 // ############################################################################
@@ -275,6 +297,15 @@ func (t *Text) WordCount() int {
 // Returns the count of the sentences in the [Text].
 func (t *Text) SentenceCount() int {
 	return len(t.Sentences()) // Sentences is cached
+}
+
+// Returns the count of the syllables in the [Text].
+func (t *Text) SyllablesCount() int {
+	count := 0
+	for _, wordSyllables := range t.Syllables() { // Syllables is cached
+		count += len(wordSyllables)
+	}
+	return count
 }
 
 // Returns a map of the types (unique word stems) and their counts for this
@@ -397,14 +428,19 @@ func (t *Text) CosineSimilarizer() *similarity.CosineSimilarizer {
 	return t.cosineSimilarizer
 }
 
+// Returns the [tokenize.WhitespaceTokenizer] configured on this [Text].
+func (t *Text) WhitespaceTokenizer() *tokenize.WhitespaceTokenizer {
+	return t.whitespaceTokenizer
+}
+
 // Returns the [tokenize.SentenceSegmenter] configured on this [Text].
 func (t *Text) SentenceSegmenter() *tokenize.SentenceSegmenter {
 	return t.sentenceSegmenter
 }
 
-// Returns the [tokenize.WhitespaceTokenizer] configured on this [Text].
-func (t *Text) WhitespaceTokenizer() *tokenize.WhitespaceTokenizer {
-	return t.whitespaceTokenizer
+// Returns the [tokenize.SSPSyllableTokenizer] configured on this [Text].
+func (t *Text) SSPSyllableTokenizer() *tokenize.SSPSyllableTokenizer {
+	return t.sspSyllableTokenizer
 }
 
 // ############################################################################
@@ -424,4 +460,19 @@ func (t *Text) StemsCache() (stems tokenlist.TokenList) {
 // Returns the raw cache value for this [Text]s type count.
 func (t *Text) TypeCountCache() (types map[string]int) {
 	return t.typecount
+}
+
+// Returns the raw cache value for this [Text]s words.
+func (t *Text) WordsCache() (words tokenlist.TokenList) {
+	return t.words
+}
+
+// Returns the raw cache value for this [Text]s sentences.
+func (t *Text) SentencesCache() (sentences tokenlist.TokenList) {
+	return t.sentences
+}
+
+// Returns the raw cache value for this [Text]s syllables.
+func (t *Text) SyllablesCache() (syllables [][]string) {
+	return t.syllables
 }

@@ -22,9 +22,13 @@ func TestNew(t *testing.T) {
 		require.Equal(t, language.English, myText.Language())
 		require.IsType(t, &stem.Porter2Stemmer{}, myText.Stemmer())
 		require.IsType(t, &tokenize.RegexTokenizer{}, myText.Tokenizer())
+
 		require.NotNil(t, myText.TypeCounter())
 		require.NotNil(t, myText.CountVectorizer())
 		require.NotNil(t, myText.CosineSimilarizer())
+		require.NotNil(t, myText.WhitespaceTokenizer())
+		require.NotNil(t, myText.SentenceSegmenter())
+		require.NotNil(t, myText.SSPSyllableTokenizer())
 	})
 
 	t.Run("VocabularyOption", func(t *testing.T) {
@@ -109,6 +113,61 @@ func TestStems(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expected, stems)
 	require.Equal(t, expected, myText.StemsCache())
+}
+
+func TestWordsAndCount(t *testing.T) {
+	myText, err := text.New("apple bananna aardvark aardvarks zebra")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	expected := tokenlist.New([]string{"apple", "bananna", "aardvark", "aardvarks", "zebra"})
+	require.Nil(t, myText.WordsCache())
+	words := myText.Words()
+	require.Equal(t, expected, words)
+	require.Equal(t, expected, myText.WordsCache())
+	require.Equal(t, len(expected), myText.WordCount())
+}
+
+func TestSentencesAndCount(t *testing.T) {
+	myText, err := text.New("The quick brown fox, Mr. Fox, jumped over the quicker-- 105.4% quicker, in fact-- \n brown fox, the Hon. Judge Fox, because it owed the quicker fox $3.14! Isn't that amazing!?\n I think so!\t Crazy times, indeed. Ellipses... Interrobang!? This last sentence has no punctuation at the end")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	expected := tokenlist.New([]string{
+		"The quick brown fox, Mr. Fox, jumped over the quicker-- 105.4% quicker, in fact-- brown fox, the Hon. Judge Fox, because it owed the quicker fox $3.14!",
+		"Isn't that amazing!?",
+		"I think so!",
+		"Crazy times, indeed.",
+		"Ellipses...",
+		"Interrobang!?",
+		"This last sentence has no punctuation at the end",
+	})
+	require.Nil(t, myText.SentencesCache())
+	actual := myText.Sentences()
+	require.Equal(t, expected, actual)
+	require.Equal(t, expected, myText.SentencesCache())
+	require.Equal(t, len(expected), myText.SentenceCount())
+}
+
+func TestSyllablesAndCount(t *testing.T) {
+	myText, err := text.New("justification ice-nine ice9 ice 9 two words")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	expected := [][]string{
+		{"jus", "ti", "fi", "ca", "tion"},
+		{"i", "ce", "-", "ni", "ne"},
+		{"i", "ce9"},
+		{"i", "ce"},
+		{"9"},
+		{"two"},
+		{"words"},
+	}
+	require.Nil(t, myText.SyllablesCache())
+	actual := myText.Syllables()
+	require.Equal(t, expected, actual)
+	require.Equal(t, expected, myText.SyllablesCache())
+	require.Equal(t, 17, myText.SyllablesCount())
 }
 
 func TestTypeCount(t *testing.T) {
