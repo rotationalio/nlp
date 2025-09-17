@@ -49,12 +49,14 @@ func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, always
 	// Get trigrams for the token
 	runeToken := []rune(word)
 	syllable := []rune{runeToken[0]} // start with first rune
-	for i := 1; i < len(runeToken)-2; i++ {
+	for i := 1; i <= len(runeToken)-2; i++ {
 		focusRune := runeToken[i]
 
-		// Treat numbers and punctuation as instant syllable breaks and as
-		// their own syllable
-		if unicode.IsPunct(focusRune) || unicode.IsNumber(focusRune) {
+		// Treat certain characters as their own syllables:
+		//  * punctuation
+		//  * numbers
+		//  * whitespace
+		if unicode.IsPunct(focusRune) || unicode.IsNumber(focusRune) || unicode.IsSpace(focusRune) {
 			syllables = append(syllables, string(syllable))
 			syllables = append(syllables, string(focusRune))
 			syllable = syllable[:0]
@@ -105,18 +107,23 @@ func (t *SSPSyllableTokenizer) validateSyllables(syllables []string) (validatedS
 	// Process all of the syllables to ensure they all have vowels, if possible
 	currentSyllable := ""
 	for _, syllable := range syllables {
+		// Skip empty string syllables
+		if syllable == "" {
+			continue
+		}
+
 		// If there is no current syllable, set this one as the current one
 		if currentSyllable == "" {
 			currentSyllable = syllable
 			continue
 		}
 
-		// If there is only one rune in the syllable and it is a number or
-		// punctuation, then add the previous syllable and this one and start
-		// a fresh syllable
+		// Treat certain characters as their own syllable:
+		//  * punctuation
+		//  * whitespace
 		runeSyllable := []rune(syllable)
 		if len(runeSyllable) == 1 {
-			if unicode.IsNumber(runeSyllable[0]) || unicode.IsPunct(runeSyllable[0]) {
+			if unicode.IsPunct(runeSyllable[0]) || unicode.IsSpace(runeSyllable[0]) {
 				validatedSyllables = append(validatedSyllables, currentSyllable)
 				validatedSyllables = append(validatedSyllables, syllable)
 				currentSyllable = ""
