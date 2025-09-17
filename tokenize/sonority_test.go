@@ -10,6 +10,7 @@ import (
 )
 
 func TestSSPSyllableTokenizer(t *testing.T) {
+	//FIXME: some of these expected results are probably incorrect
 	testcases := []struct {
 		Name     string
 		Language language.Language

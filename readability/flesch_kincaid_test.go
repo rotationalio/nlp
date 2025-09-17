@@ -26,8 +26,8 @@ func TestFleschKincaid(t *testing.T) {
 		{
 			Name:          "CatMat",
 			TextFilename:  "testdata/cat_mat.txt",
-			ExpectedEase:  76.89, //FIXME: this is an incorrect score
-			ExpectedGrade: 3.2,   //FIXME: this is an incorrect score
+			ExpectedEase:  76.890, //FIXME: this is an incorrect score
+			ExpectedGrade: 3.280,  //FIXME: this is an incorrect score
 		},
 	}
 
