@@ -103,9 +103,14 @@ func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, always
 		syllable = append(syllable, focusRune)
 	}
 
-	// Append the last syllable and last rune as syllables
-	syllables = append(syllables, string(syllable))
-	syllables = append(syllables, string(runeToken[len(runeToken)-1]))
+	// Append the last rune and syllable depending on what the last rune is
+	if unicode.IsPunct(runeToken[len(runeToken)-1]) {
+		syllables = append(syllables, string(syllable))
+		syllables = append(syllables, string(runeToken[len(runeToken)-1]))
+	} else {
+		syllable = append(syllable, runeToken[len(runeToken)-1])
+		syllables = append(syllables, string(syllable))
+	}
 
 	// Validate and return syllables
 	return t.validateSyllables(syllables), nil

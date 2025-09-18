@@ -10,7 +10,6 @@ import (
 )
 
 func TestSSPSyllableTokenizer(t *testing.T) {
-	//FIXME: some of these expected results are probably incorrect
 	testcases := []struct {
 		Name     string
 		Language language.Language
@@ -33,7 +32,7 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Name:     "Punctuation",
 			Language: language.English,
 			Word:     "ice-nine",
-			Expected: []string{"i", "ce", "-", "nin", "e"},
+			Expected: []string{"i", "ce", "-", "ni", "ne"},
 		},
 		{
 			Name:     "Alphanumeric",

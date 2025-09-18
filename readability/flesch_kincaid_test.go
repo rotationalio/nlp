@@ -20,14 +20,14 @@ func TestFleschKincaid(t *testing.T) {
 		{
 			Name:          "DeclarationOfIndependence",
 			TextFilename:  "testdata/declaration.txt",
-			ExpectedEase:  0.911,  //FIXME: this is an incorrect score
-			ExpectedGrade: 22.531, //FIXME: this is an incorrect score
+			ExpectedEase:  6.688,
+			ExpectedGrade: 21.725,
 		},
 		{
 			Name:          "CatMat",
 			TextFilename:  "testdata/cat_mat.txt",
-			ExpectedEase:  76.890, //FIXME: this is an incorrect score
-			ExpectedGrade: 3.280,  //FIXME: this is an incorrect score
+			ExpectedEase:  105.09,
+			ExpectedGrade: -0.653,
 		},
 	}
 

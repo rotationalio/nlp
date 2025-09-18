@@ -76,6 +76,15 @@ Usage example:
 	// We can also get a one-hot or frequency vectorization of our text
 	myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
 	myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+
+	// Get readability scores
+	ease, err := myText.FleschKincaidReadingEase()
+	grade, err := myText.FleschKincaidGradeLevel()
+
+	// Get the counts of various things
+	count := myText.WordsCount() // 7
+	count = myText.SentencesCount() // 1
+	count = myText.SyllablesCount() // 17
 */
 type Text struct {
 	// The string representation of the text

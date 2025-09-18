@@ -92,14 +92,28 @@ similarity, err := myText.CosineSimilarity(otherText) // ~0.5
 // We can also get a one-hot or frequency vectorization of our text
 myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
 myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+
+// Get readability scores
+ease, err := myText.FleschKincaidReadingEase()
+grade, err := myText.FleschKincaidGradeLevel()
+
+// Get the counts of various things
+count := myText.WordsCount() // 7
+count = myText.SentencesCount() // 1
+count = myText.SyllablesCount() // 17
 ```
 
 See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
 
 ## Features, metrics, and tools
 
-* Tokenization and type counting
+* Tokenization
   * Regex tokenization with custom expression support
+  * Whitespace-only word tokenization
+  * Sonority Sequencing syllable tokenization
+* Counting
+  * Type counts (map of type -> instance count)
+  * Counting functions for sentences, words, syllables, etc.
 * Stemming
   * Porter2/Snowball stemming algorithm
 * Similarity metrics
@@ -107,12 +121,15 @@ See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
 * Vectors & vectorization
   * One-hot encoding
   * Frequency (count) encoding
+* Readability Scoring
+  * Flesch-Kincaid Reading Ease and grade level scores
 * Descriptive statistics (minimum, maximum, mean, stddev, variance, etc.)
   * See the stats package [README.md](./stats/README.md) for more information
 
 ### Planned
 
-* Readability Scores (ASAP)
+* Additional Readability Scoring (Soon)
+* Text Embeddings Support (Future)
 * Part-of-Speech Distributions (Future)
 * Named Entities & Keyphrase Counts (Future)
 * Custom Classifiers (Distant Future)

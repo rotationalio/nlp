@@ -154,21 +154,20 @@ func TestSyllablesAndCount(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, myText)
 
-	//FIXME: these are probably incorrect:
 	expected := [][]string{
 		{"jus", "ti", "fi", "ca", "tion"},
-		{"i", "ce", "-", "nin", "e"},
+		{"i", "ce", "-", "ni", "ne"},
 		{"i", "ce9"},
-		{"ic", "e"},
+		{"i", "ce"},
 		{"9"},
-		{"tw", "o"},
+		{"two"},
 		{"words"},
 	}
 	require.Nil(t, myText.SyllablesCache())
 	actual := myText.Syllables()
 	require.Equal(t, expected, actual)
 	require.Equal(t, expected, myText.SyllablesCache())
-	require.Equal(t, 18, myText.SyllableCount())
+	require.Equal(t, 17, myText.SyllableCount())
 }
 
 func TestTypeCount(t *testing.T) {
@@ -325,4 +324,20 @@ func TestTextDocs(t *testing.T) {
 	myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
 	require.NoError(t, err)
 	require.Equal(t, vector.Vector{1, 2, 0, 0}, myFrequencyVector)
+
+	// Get readability scores
+	ease, err := myText.FleschKincaidReadingEase()
+	require.NoError(t, err)
+	require.InDelta(t, -5.727, ease, 1e-3)
+	grade, err := myText.FleschKincaidGradeLevel()
+	require.NoError(t, err)
+	require.InDelta(t, 15.797, grade, 1e-3)
+
+	// Get the counts of various things
+	count := myText.WordCount()
+	require.Equal(t, 7, count)
+	count = myText.SentenceCount()
+	require.Equal(t, 1, count)
+	count = myText.SyllableCount()
+	require.Equal(t, 17, count)
 }
