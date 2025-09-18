@@ -148,6 +148,10 @@ Any documentation or research that isn't immediately relevant to the user in the
 
 To ensure the algorithms in this package are accurate, we pulled information from several references, which have been recorded in [`docs/sources.md`](./docs/sources.md) and in the documentation and comments for the individual functions in this library.
 
+## Examples
+
+There are several examples for how to use NLP library in the [`docs/examples`](./docs/examples/) folder. Run them using: `go run docs/examples/FILENAME.go`
+
 ## Research Notes
 
 Research on different topics will go into the folder [`docs/research/`](./docs/research/).

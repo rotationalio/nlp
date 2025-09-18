@@ -117,7 +117,8 @@ func (t *SSPSyllableTokenizer) Tokenize(word string) (syllables []string, always
 }
 
 // Ensures all syllables have a vowel by appending syllables without vowels to
-// the previous syllable.
+// the previous syllable. This function may return nil if there are no proper
+// syllables.
 func (t *SSPSyllableTokenizer) validateSyllables(syllables []string) (validatedSyllables []string) {
 	// If there is 0 or 1 syllables return immediately
 	if len(syllables) <= 1 {
@@ -132,23 +133,24 @@ func (t *SSPSyllableTokenizer) validateSyllables(syllables []string) (validatedS
 			continue
 		}
 
-		// If there is no current syllable, set this one as the current one
-		if currentSyllable == "" {
-			currentSyllable = syllable
-			continue
-		}
-
-		// Treat certain characters as their own syllable:
+		// Ignore certain "syllables"
 		//  * punctuation
 		//  * whitespace
 		runeSyllable := []rune(syllable)
 		if len(runeSyllable) == 1 {
 			if unicode.IsPunct(runeSyllable[0]) || unicode.IsSpace(runeSyllable[0]) {
-				validatedSyllables = append(validatedSyllables, currentSyllable)
-				validatedSyllables = append(validatedSyllables, syllable)
-				currentSyllable = ""
+				if currentSyllable != "" {
+					validatedSyllables = append(validatedSyllables, currentSyllable)
+					currentSyllable = ""
+				}
 				continue
 			}
+		}
+
+		// If there is no current syllable, set this one as the current one
+		if currentSyllable == "" {
+			currentSyllable = syllable
+			continue
 		}
 
 		// If a syllable has a vowel (upper or lower cases), then add the

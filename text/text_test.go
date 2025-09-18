@@ -156,7 +156,7 @@ func TestSyllablesAndCount(t *testing.T) {
 
 	expected := [][]string{
 		{"jus", "ti", "fi", "ca", "tion"},
-		{"i", "ce", "-", "ni", "ne"},
+		{"i", "ce", "ni", "ne"},
 		{"i", "ce9"},
 		{"i", "ce"},
 		{"9"},
@@ -167,7 +167,7 @@ func TestSyllablesAndCount(t *testing.T) {
 	actual := myText.Syllables()
 	require.Equal(t, expected, actual)
 	require.Equal(t, expected, myText.SyllablesCache())
-	require.Equal(t, 17, myText.SyllableCount())
+	require.Equal(t, 16, myText.SyllableCount())
 }
 
 func TestTypeCount(t *testing.T) {

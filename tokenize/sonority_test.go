@@ -32,7 +32,7 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Name:     "Punctuation",
 			Language: language.English,
 			Word:     "ice-nine",
-			Expected: []string{"i", "ce", "-", "ni", "ne"},
+			Expected: []string{"i", "ce", "ni", "ne"},
 		},
 		{
 			Name:     "Alphanumeric",
@@ -44,13 +44,13 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Name:     "Alpha_Space_Numeric",
 			Language: language.English,
 			Word:     "ice 9",
-			Expected: []string{"i", "ce", " ", "9"},
+			Expected: []string{"i", "ce", "9"},
 		},
 		{
 			Name:     "Two_Words",
 			Language: language.English,
 			Word:     "two words",
-			Expected: []string{"two", " ", "words"},
+			Expected: []string{"two", "words"},
 		},
 		{
 			Name:     "TwoChars",
@@ -68,18 +68,21 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Name:     "ThreePunct",
 			Language: language.English,
 			Word:     ".!?",
-			Expected: []string{".", "!", "?"},
+			Expected: nil,
 		},
 		{
 			Name:     "TwoPunct_Degnerative_Case",
 			Language: language.English,
 			Word:     "!?",
-			// NOTE: We would normally want `{"!", "?"}`, however the
+			// NOTE: We would normally want `{}`, however the
 			// implementation returns `{"!?"}`, which we'll accept as a
 			// degenerative case for this algorithm to make things simpler.
 			Expected: []string{"!?"},
 		},
 		{
+			// NOTE: We would normally want `{}`, however the
+			// implementation returns `{"."}`, which we'll accept as a
+			// degenerative case for this algorithm to make things simpler.
 			Name:     "OnePunctMan",
 			Language: language.English,
 			Word:     ".",
@@ -107,7 +110,7 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Name:     "Initialism",
 			Language: language.English,
 			Word:     "F.B.I.",
-			Expected: []string{"F", ".", "B", ".", "I", "."},
+			Expected: []string{"F", "B", "I"},
 		},
 	}
 

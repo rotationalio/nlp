@@ -20,14 +20,14 @@ func TestFleschKincaid(t *testing.T) {
 		{
 			Name:          "DeclarationOfIndependence",
 			TextFilename:  "testdata/declaration.txt",
-			ExpectedEase:  6.688,
-			ExpectedGrade: 21.725,
+			ExpectedEase:  17.247, // 29.60 at https://serpninja.io/tools/flesch-kincaid-calculator/
+			ExpectedGrade: 20.253, // 18.28 at https://serpninja.io/tools/flesch-kincaid-calculator/
 		},
 		{
 			Name:          "CatMat",
 			TextFilename:  "testdata/cat_mat.txt",
-			ExpectedEase:  105.09,
-			ExpectedGrade: -0.653,
+			ExpectedEase:  119.19, // 116.15 at https://serpninja.io/tools/flesch-kincaid-calculator/
+			ExpectedGrade: -2.620, // -1.45 at https://serpninja.io/tools/flesch-kincaid-calculator/
 		},
 	}
 
