@@ -68,6 +68,9 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Name:     "ThreePunct",
 			Language: language.English,
 			Word:     ".!?",
+			// NOTE: We would normally want `{}`, however the
+			// implementation returns `nil`, which we'll accept as a
+			// degenerative case for this algorithm to make things simpler.
 			Expected: nil,
 		},
 		{
@@ -80,12 +83,12 @@ func TestSSPSyllableTokenizer(t *testing.T) {
 			Expected: []string{"!?"},
 		},
 		{
-			// NOTE: We would normally want `{}`, however the
-			// implementation returns `{"."}`, which we'll accept as a
-			// degenerative case for this algorithm to make things simpler.
 			Name:     "OnePunctMan",
 			Language: language.English,
 			Word:     ".",
+			// NOTE: We would normally want `{}`, however the
+			// implementation returns `{"."}`, which we'll accept as a
+			// degenerative case for this algorithm to make things simpler.
 			Expected: []string{"."},
 		},
 		{

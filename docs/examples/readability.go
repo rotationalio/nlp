@@ -32,4 +32,5 @@ func StatsExample() {
 
 func main() {
 	ComparisonExample()
+	StatsExample()
 }
