@@ -93,9 +93,10 @@ similarity, err := myText.CosineSimilarity(otherText) // ~0.5
 myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
 myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
 
-// Get readability scores
-ease, err := myText.FleschKincaidReadingEase()
-grade, err := myText.FleschKincaidGradeLevel()
+// Get readability scores (a score of 0.0 indicates that the word and/or
+// sentence count is zero)
+ease := myText.FleschKincaidReadingEase() // -5.727
+grade := myText.FleschKincaidGradeLevel() // 15.797
 
 // Get the counts of various things
 count := myText.WordsCount() // 7

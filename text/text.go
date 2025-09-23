@@ -77,9 +77,10 @@ Usage example:
 	myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
 	myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
 
-	// Get readability scores
-	ease, err := myText.FleschKincaidReadingEase()
-	grade, err := myText.FleschKincaidGradeLevel()
+	// Get readability scores (a score of 0.0 indicates that the word and/or
+	// sentence count is zero)
+	ease := myText.FleschKincaidReadingEase() // -5.727
+	grade := myText.FleschKincaidGradeLevel() // 15.797
 
 	// Get the counts of various things
 	count := myText.WordsCount() // 7
@@ -369,15 +370,15 @@ func (t *Text) CosineSimilarity(other *Text) (similarity float64, err error) {
 // Readability
 // ###########################################################################
 
-// Returns the Flesch-Kincaid Reading Ease score. Returns an [errors.ErrUndefinedValue]
-// when the sentence and/or word count is zero.
-func (t *Text) FleschKincaidReadingEase() (score float64, err error) {
+// Returns the Flesch-Kincaid Reading Ease score. Returns the value 0.0 when the
+// sentence and/or word count is zero.
+func (t *Text) FleschKincaidReadingEase() (score float64) {
 	return readability.FleschKincaidReadingEase(t.WordCount(), t.SentenceCount(), t.SyllableCount())
 }
 
-// Returns the Flesch-Kincaid grade level. Returns an [errors.ErrUndefinedValue]
-// when the sentence and/or word count is zero.
-func (t *Text) FleschKincaidGradeLevel() (score float64, err error) {
+// Returns the Flesch-Kincaid grade level. Returns the value 0.0 when the
+// sentence and/or word count is zero.
+func (t *Text) FleschKincaidGradeLevel() (score float64) {
 	return readability.FleschKincaidGradeLevel(t.WordCount(), t.SentenceCount(), t.SyllableCount())
 }
 

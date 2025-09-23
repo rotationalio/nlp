@@ -24,9 +24,9 @@ func RewrittenExample() {
 	// Rewritten by an LLM
 	llmText, _ := text.New("I added tools to measure how easy it is to read text (like Flesch-Kincaid scores) and what grade level it's at. I also added features like splitting text into sentences, breaking words into syllables, and handling spaces more efficiently. There's also a regular expression version of the space tokenizer for the same result. I added some extra functions on the Text API that were useful. I also started adding tools to the ngrams package, but didn't use them in this project --- they might be helpful later.")
 
-	// Get scores
-	humanEase, _ := humanText.FleschKincaidReadingEase()
-	llmEase, _ := llmText.FleschKincaidReadingEase()
+	// Get scores (a score of 0.0 indicates that the word and/or sentence count is zero)
+	humanEase := humanText.FleschKincaidReadingEase()
+	llmEase := llmText.FleschKincaidReadingEase()
 
 	// Compare
 	if humanEase > llmEase {
@@ -60,9 +60,9 @@ func ELIFive_and_ELIHighSchool() {
 	// "Explain electricity to a HS senior in a single paragraph"
 	eliHSText, _ := text.New("Electricity is the movement of electrons, which are negatively charged particles, through a conductor like a metal wire. This flow is known as electric current, and it requires a closed, continuous loop called a circuit to travel. The \"push\" that forces electrons to move is called voltage, or potential difference, and can be compared to the pressure in a water pipe. Resistance, measured in ohms, is the opposition to this flow, acting like a narrow section or kink in the pipe that slows down the current. Power plants generate electricity by converting other forms of energy (such as the kinetic energy from steam, wind, or flowing water) into electrical energy, often by spinning a turbine that drives a generator.")
 
-	// Get grades
-	eliFiveGrade, _ := eliFiveText.FleschKincaidGradeLevel()
-	eliHSGrade, _ := eliHSText.FleschKincaidGradeLevel()
+	// Get grades (a score of 0.0 indicates that the word and/or sentence count is zero)
+	eliFiveGrade := eliFiveText.FleschKincaidGradeLevel()
+	eliHSGrade := eliHSText.FleschKincaidGradeLevel()
 
 	// Compare
 	if eliFiveGrade < eliHSGrade {
@@ -104,10 +104,10 @@ func StatsExample() {
 		if review != "" {
 			myText, _ := text.New(string(review))
 
-			ease, _ := myText.FleschKincaidReadingEase()
+			ease := myText.FleschKincaidReadingEase()
 			easeStats.Update(ease)
 
-			grade, _ := myText.FleschKincaidGradeLevel()
+			grade := myText.FleschKincaidGradeLevel()
 			gradeStats.Update(grade)
 
 			wordsPerSentenceStats.Update(float64(myText.WordCount()) / float64(myText.SentenceCount()))

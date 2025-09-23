@@ -230,12 +230,12 @@ func TestFleschKincaidErrorsOnly(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, myText)
 
-	// We only need to make sure that no errors or panics happen; the
-	// correctness tests are in the [readability_test] package.
-	_, err = myText.FleschKincaidReadingEase()
-	require.NoError(t, err)
-	_, err = myText.FleschKincaidGradeLevel()
-	require.NoError(t, err)
+	// We only need to make sure that no panics happen and the scores aren't 0.0
+	// because the correctness tests are in the [readability_test] package.
+	score := myText.FleschKincaidReadingEase()
+	require.NotEqual(t, 0.0, score)
+	score = myText.FleschKincaidGradeLevel()
+	require.NotEqual(t, 0.0, score)
 }
 
 // Tests that the docstring for [text.Text] work properly; if this ever fails
@@ -325,12 +325,11 @@ func TestTextDocs(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, vector.Vector{1, 2, 0, 0}, myFrequencyVector)
 
-	// Get readability scores
-	ease, err := myText.FleschKincaidReadingEase()
-	require.NoError(t, err)
+	// Get readability scores (a score of 0.0 indicates that the word and/or
+	// sentence count is zero)
+	ease := myText.FleschKincaidReadingEase()
 	require.InDelta(t, -5.727, ease, 1e-3)
-	grade, err := myText.FleschKincaidGradeLevel()
-	require.NoError(t, err)
+	grade := myText.FleschKincaidGradeLevel()
 	require.InDelta(t, 15.797, grade, 1e-3)
 
 	// Get the counts of various things

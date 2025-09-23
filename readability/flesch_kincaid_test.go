@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.rtnl.ai/nlp/errors"
 	"go.rtnl.ai/nlp/readability"
 	"go.rtnl.ai/nlp/text"
 )
@@ -41,27 +40,21 @@ func TestFleschKincaid(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, myText)
 
-			actualEase, err := readability.FleschKincaidReadingEase(myText.WordCount(), myText.SentenceCount(), myText.SyllableCount())
-			require.NoError(t, err)
+			actualEase := readability.FleschKincaidReadingEase(myText.WordCount(), myText.SentenceCount(), myText.SyllableCount())
 			require.InDelta(t, tc.ExpectedEase, actualEase, 1e-3)
 
-			actualGrade, err := readability.FleschKincaidGradeLevel(myText.WordCount(), myText.SentenceCount(), myText.SyllableCount())
-			require.NoError(t, err)
+			actualGrade := readability.FleschKincaidGradeLevel(myText.WordCount(), myText.SentenceCount(), myText.SyllableCount())
 			require.InDelta(t, tc.ExpectedGrade, actualGrade, 1e-3)
 		})
 	}
 }
 
 func TestFleschKincaidError(t *testing.T) {
-	// Word count cannot be zero
-	_, err := readability.FleschKincaidReadingEase(0, 1, 1)
-	require.ErrorIs(t, err, errors.ErrUndefinedValue)
+	// Word count cannot be zero (div/0)
+	ease := readability.FleschKincaidReadingEase(0, 1, 1)
+	require.Equal(t, 0.0, ease)
 
-	// Sentence count cannot be zero
-	_, err = readability.FleschKincaidReadingEase(1, 0, 1)
-	require.ErrorIs(t, err, errors.ErrUndefinedValue)
-
-	// Syllable count can be zero
-	_, err = readability.FleschKincaidReadingEase(1, 1, 0)
-	require.NoError(t, err)
+	// Sentence count cannot be zero (div/0)
+	ease = readability.FleschKincaidReadingEase(1, 0, 1)
+	require.Equal(t, 0.0, ease)
 }
