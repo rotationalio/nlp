@@ -22,9 +22,13 @@ func TestNew(t *testing.T) {
 		require.Equal(t, language.English, myText.Language())
 		require.IsType(t, &stem.Porter2Stemmer{}, myText.Stemmer())
 		require.IsType(t, &tokenize.RegexTokenizer{}, myText.Tokenizer())
+
 		require.NotNil(t, myText.TypeCounter())
 		require.NotNil(t, myText.CountVectorizer())
 		require.NotNil(t, myText.CosineSimilarizer())
+		require.NotNil(t, myText.WhitespaceTokenizer())
+		require.NotNil(t, myText.SentenceSegmenter())
+		require.NotNil(t, myText.SSPSyllableTokenizer())
 	})
 
 	t.Run("VocabularyOption", func(t *testing.T) {
@@ -111,6 +115,61 @@ func TestStems(t *testing.T) {
 	require.Equal(t, expected, myText.StemsCache())
 }
 
+func TestWordsAndCount(t *testing.T) {
+	myText, err := text.New("apple bananna aardvark aardvarks zebra")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	expected := tokenlist.New([]string{"apple", "bananna", "aardvark", "aardvarks", "zebra"})
+	require.Nil(t, myText.WordsCache())
+	words := myText.Words()
+	require.Equal(t, expected, words)
+	require.Equal(t, expected, myText.WordsCache())
+	require.Equal(t, len(expected), myText.WordCount())
+}
+
+func TestSentencesAndCount(t *testing.T) {
+	myText, err := text.New("The quick brown fox, Mr. Fox, jumped over the quicker-- 105.4% quicker, in fact-- \n brown fox, the Hon. Judge Fox, because it owed the quicker fox $3.14! Isn't that amazing!?\n I think so!\t Crazy times, indeed. Ellipses... Interrobang!? This last sentence has no punctuation at the end")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	expected := tokenlist.New([]string{
+		"The quick brown fox, Mr. Fox, jumped over the quicker-- 105.4% quicker, in fact-- brown fox, the Hon. Judge Fox, because it owed the quicker fox $3.14!",
+		"Isn't that amazing!?",
+		"I think so!",
+		"Crazy times, indeed.",
+		"Ellipses...",
+		"Interrobang!?",
+		"This last sentence has no punctuation at the end",
+	})
+	require.Nil(t, myText.SentencesCache())
+	actual := myText.Sentences()
+	require.Equal(t, expected, actual)
+	require.Equal(t, expected, myText.SentencesCache())
+	require.Equal(t, len(expected), myText.SentenceCount())
+}
+
+func TestSyllablesAndCount(t *testing.T) {
+	myText, err := text.New("justification ice-nine ice9 ice 9 two words")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	expected := [][]string{
+		{"jus", "ti", "fi", "ca", "tion"},
+		{"i", "ce", "ni", "ne"},
+		{"i", "ce9"},
+		{"i", "ce"},
+		{"9"},
+		{"two"},
+		{"words"},
+	}
+	require.Nil(t, myText.SyllablesCache())
+	actual := myText.Syllables()
+	require.Equal(t, expected, actual)
+	require.Equal(t, expected, myText.SyllablesCache())
+	require.Equal(t, 16, myText.SyllableCount())
+}
+
 func TestTypeCount(t *testing.T) {
 	myText, err := text.New("apple bananna aardvark aardvarks zebra")
 	require.NoError(t, err)
@@ -164,6 +223,19 @@ func TestCosineSimilarity(t *testing.T) {
 	similarity, err := myText.CosineSimilarity(otherText)
 	require.NoError(t, err)
 	require.InDelta(t, expected, similarity, 1e-12)
+}
+
+func TestFleschKincaidErrorsOnly(t *testing.T) {
+	myText, err := text.New("The cat sat on the mat.")
+	require.NoError(t, err)
+	require.NotNil(t, myText)
+
+	// We only need to make sure that no panics happen and the scores aren't 0.0
+	// because the correctness tests are in the [readability_test] package.
+	score := myText.FleschKincaidReadingEase()
+	require.NotEqual(t, 0.0, score)
+	score = myText.FleschKincaidGradeLevel()
+	require.NotEqual(t, 0.0, score)
 }
 
 // Tests that the docstring for [text.Text] work properly; if this ever fails
@@ -252,4 +324,19 @@ func TestTextDocs(t *testing.T) {
 	myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
 	require.NoError(t, err)
 	require.Equal(t, vector.Vector{1, 2, 0, 0}, myFrequencyVector)
+
+	// Get readability scores (a score of 0.0 indicates that the word and/or
+	// sentence count is zero)
+	ease := myText.FleschKincaidReadingEase()
+	require.InDelta(t, -5.727, ease, 1e-3)
+	grade := myText.FleschKincaidGradeLevel()
+	require.InDelta(t, 15.797, grade, 1e-3)
+
+	// Get the counts of various things
+	count := myText.WordCount()
+	require.Equal(t, 7, count)
+	count = myText.SentenceCount()
+	require.Equal(t, 1, count)
+	count = myText.SyllableCount()
+	require.Equal(t, 17, count)
 }

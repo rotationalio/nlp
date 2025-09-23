@@ -36,3 +36,13 @@ This source is an article on "developing the English stemmer" for how to impleme
 This article is simple to understand and adapt to other languages.
 
 * Snowballstem.org. The English (Porter2) stemming algorithm. Online edition, (unknown year). The English (Porter2) stemming algorithm, <https://snowballstem.org/algorithms/english/stemmer.html>.
+
+## Flesch-Kincaid readability scores
+
+The description of the Flesh-Kincaid reading score algorithm is in an archived version of this text.
+
+* Rudolf Flesch. How to Write Plain English. Archived online edition, unknown year. Chapter 2, <https://web.archive.org/web/20160712094308/http://www.mang.canterbury.ac.nz/writing_guide/writing/flesch.shtml>.
+
+This source has a formula for the Flesch-Kincaid grade level.
+
+* Kincaid JP, Fishburne RP Jr, Rogers RL, Chissom BS (February 1975). "Derivation of new readability formulas (Automated Readability Index, Fog Count and Flesch Reading Ease Formula) for Navy enlisted personnel". Research Branch Report 8-75, Millington, TN: Naval Technical Training, U. S. Naval Air Station, Memphis, TN. <https://web.archive.org/web/20201210212716/https://apps.dtic.mil/sti/pdfs/ADA006655.pdf> Archived (PDF) from the original on December 10, 2020.

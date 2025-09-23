@@ -92,14 +92,29 @@ similarity, err := myText.CosineSimilarity(otherText) // ~0.5
 // We can also get a one-hot or frequency vectorization of our text
 myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
 myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+
+// Get readability scores (a score of 0.0 indicates that the word and/or
+// sentence count is zero)
+ease := myText.FleschKincaidReadingEase() // -5.727
+grade := myText.FleschKincaidGradeLevel() // 15.797
+
+// Get the counts of various things
+count := myText.WordsCount() // 7
+count = myText.SentencesCount() // 1
+count = myText.SyllablesCount() // 17
 ```
 
 See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
 
 ## Features, metrics, and tools
 
-* Tokenization and type counting
+* Tokenization
   * Regex tokenization with custom expression support
+  * Whitespace-only word tokenization
+  * Sonority Sequencing syllable tokenization
+* Counting
+  * Type counts (map of type -> instance count)
+  * Counting functions for sentences, words, syllables, etc.
 * Stemming
   * Porter2/Snowball stemming algorithm
 * Similarity metrics
@@ -107,12 +122,15 @@ See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
 * Vectors & vectorization
   * One-hot encoding
   * Frequency (count) encoding
+* Readability Scoring
+  * Flesch-Kincaid Reading Ease and grade level scores
 * Descriptive statistics (minimum, maximum, mean, stddev, variance, etc.)
   * See the stats package [README.md](./stats/README.md) for more information
 
 ### Planned
 
-* Readability Scores (ASAP)
+* Additional Readability Scoring (Soon)
+* Text Embeddings Support (Future)
 * Part-of-Speech Distributions (Future)
 * Named Entities & Keyphrase Counts (Future)
 * Custom Classifiers (Distant Future)
@@ -130,6 +148,10 @@ Any documentation or research that isn't immediately relevant to the user in the
 ## Sources and References
 
 To ensure the algorithms in this package are accurate, we pulled information from several references, which have been recorded in [`docs/sources.md`](./docs/sources.md) and in the documentation and comments for the individual functions in this library.
+
+## Examples
+
+There are several examples for how to use NLP library in the [`docs/examples`](./docs/examples/) folder. Run them using: `go run docs/examples/FILENAME.go`
 
 ## Research Notes
 
