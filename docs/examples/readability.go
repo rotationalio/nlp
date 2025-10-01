@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"go.rtnl.ai/nlp/stats"
 	"go.rtnl.ai/nlp/text"
+	"go.rtnl.ai/x/stats"
 )
 
 // An example for how to perform readability scoring comparisons where there is
@@ -94,10 +94,10 @@ func StatsExample() {
 	data, _ := os.ReadFile("docs/examples/data/movie_reviews.txt")
 
 	// Track the stats
-	easeStats := new(stats.Statistics)
-	gradeStats := new(stats.Statistics)
-	wordsPerSentenceStats := new(stats.Statistics)
-	syllablesPerWordStats := new(stats.Statistics)
+	easeStats := new(stats.Statistics[float64])
+	gradeStats := new(stats.Statistics[float64])
+	wordsPerSentenceStats := new(stats.Statistics[int])
+	syllablesPerWordStats := new(stats.Statistics[int])
 
 	// Collect the stats for the reviews
 	for review := range strings.Lines(string(data)) {
@@ -110,27 +110,27 @@ func StatsExample() {
 			grade := myText.FleschKincaidGradeLevel()
 			gradeStats.Update(grade)
 
-			wordsPerSentenceStats.Update(float64(myText.WordCount()) / float64(myText.SentenceCount()))
+			wordsPerSentenceStats.Update(myText.WordCount() / myText.SentenceCount())
 
-			syllablesPerWordStats.Update(float64(myText.SyllableCount()) / float64(myText.WordCount()))
+			syllablesPerWordStats.Update(myText.SyllableCount() / myText.WordCount())
 		}
 	}
 
 	// Print stats info
 	fmt.Println("easeStats:")
-	fmt.Println(easeStats.Serialize())
+	fmt.Println(easeStats)
 	fmt.Println() // Newline
 
 	fmt.Println("gradeStats:")
-	fmt.Println(gradeStats.Serialize())
+	fmt.Println(gradeStats)
 	fmt.Println() // Newline
 
 	fmt.Println("wordsPerSentenceStats:")
-	fmt.Println(wordsPerSentenceStats.Serialize())
+	fmt.Println(wordsPerSentenceStats)
 	fmt.Println() // Newline
 
 	fmt.Println("syllablesPerWordStats:")
-	fmt.Println(syllablesPerWordStats.Serialize())
+	fmt.Println(syllablesPerWordStats)
 	fmt.Println() // Newline
 }
 

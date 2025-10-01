@@ -124,13 +124,14 @@ See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
   * Frequency (count) encoding
 * Readability Scoring
   * Flesch-Kincaid Reading Ease and grade level scores
-* Descriptive statistics (minimum, maximum, mean, stddev, variance, etc.)
-  * See the stats package [README.md](./stats/README.md) for more information
+
+Note: The `stats` package for descriptive statistics has been improved with Go generics support moved to Rotational's Go `x` library at <https://github.com/rotationalio/x/tree/main/stats>.
+You can use the improved `stats` package by adding it to your Go project using `go get go.rtnl.ai/x/stats`.
 
 ### Planned
 
 * Additional Readability Scoring (Soon)
-* Text Embeddings Support (Future)
+* Text Embeddings Support (via a 3rd party service) (Soon)
 * Part-of-Speech Distributions (Future)
 * Named Entities & Keyphrase Counts (Future)
 * Custom Classifiers (Distant Future)
