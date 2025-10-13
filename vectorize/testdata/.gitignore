@@ -1,0 +1,2 @@
+# We need an API key to test the VoyageAIEmbedder, but do not want to commit it!
+voyageai_credentials.json

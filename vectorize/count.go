@@ -169,7 +169,7 @@ func (v *CountVectorizer) VectorizeOneHot(chunk string, vocab []string) (vector 
 // CountVectorizerOption
 // ############################################################################
 
-// TypeCounterOption functions modify a [CountVectorizer].
+// CountVectorizerOption functions modify a [CountVectorizer].
 type CountVectorizerOption func(c *CountVectorizer)
 
 // CountVectorizerWithLang sets the vocabulary to use with the
