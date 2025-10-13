@@ -2,6 +2,7 @@ package vectorize_test
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"testing"
 
@@ -11,7 +12,8 @@ import (
 
 // Creates a [vectorize.VoyageAIEmbedder] and tests it's client functionality
 // live. This requires the JSON file `testdata/voyageai_credentials.json` to be
-// present and have a functional API key.
+// present and have a functional API key. If the file is missing, this test will
+// be skipped instead of failing.
 //
 // NOTE: This test will use 25 tokens worth of usage on VoyageAI.
 func TestVoyageAIEmbedder(t *testing.T) {
@@ -20,6 +22,10 @@ func TestVoyageAIEmbedder(t *testing.T) {
 
 	// Load the API key credential from the JSON file
 	credJson, err := os.ReadFile("testdata/voyageai_credentials.json")
+	if errors.Is(err, os.ErrNotExist) {
+		// If the file does not exist, then skip this test instead of failing.
+		t.SkipNow()
+	}
 	require.NoError(t, err, "error reading file")
 
 	var creds map[string]any
