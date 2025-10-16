@@ -147,14 +147,14 @@ func (v *VoyageAIEmbedder) makeTextEmbeddingsRequest(data *VoyageAIEmbeddingsReq
 		body     *VoyageAIEmbeddingsResponse
 	)
 
-	// Get JSON body
+	// Marshal JSON body
 	if jsonData, err = json.Marshal(data); err != nil {
-		return nil, err
+		return nil, errors.Join(err, errors.New("error encoding VoyageAIEmbeddingsRequest"))
 	}
 
 	// Create HTTP request
 	if request, err = http.NewRequest("POST", v.endpoint, bytes.NewBuffer(jsonData)); err != nil {
-		return nil, err
+		return nil, errors.Join(err, errors.New("error creating embeddings http request"))
 	}
 
 	// Set headers
@@ -163,13 +163,13 @@ func (v *VoyageAIEmbedder) makeTextEmbeddingsRequest(data *VoyageAIEmbeddingsReq
 
 	// Make request
 	if response, err = v.client.Do(request); err != nil {
-		return nil, err
+		return nil, errors.Join(err, errors.New("embeddings request failed"))
 	}
 
 	// Unmarshal data
 	err = json.NewDecoder(response.Body).Decode(&body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(err, errors.New("error decoding VoyageAIEmbeddingsResponse"))
 	}
 
 	// Count the tokens used so we have a running total for this client
