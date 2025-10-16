@@ -5,7 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
+	"github.com/joho/godotenv"
+	"go.rtnl.ai/nlp/errors"
 	"go.rtnl.ai/nlp/vector"
 )
 
@@ -30,23 +34,47 @@ var _ Vectorizer = &VoyageAIEmbedder{}
 // VoyageAI Constructor and Options
 // ############################################################################
 
-// Create a new VoyageAI embedding vectorizer. Providing an API key is required.
-//
-// Defaults:
-//   - Endpoint: "https://api.voyageai.com/v1/embeddings"	(Set with [VoyageAIEmbedderWithModel])
-//   - Model: 	 "voyage-3.5-lite" 							(Set with [VoyageAIEmbedderWithEndpoint])
-func NewVoyageAIEmbedder(apiKey string, opts ...VoyageAIEmbedderOption) (vectorizer *VoyageAIEmbedder, err error) {
-	// Initialize with defaults
+// Create a new VoyageAI embedding vectorizer. Options will be loaded from
+// "VOYAGEAI_*" environment variables (loaded from `nlp/vectorize/.env`). The
+// environment values will be overridden by [VoyageAIEmbedderOption]s.If a
+// necessary option is not provided or found in the environment, then
+// [errors.ErrMissingConfig] will be returned alongside another more descriptive
+// error, so ensure you use [errors.Is] to disambiguate the errors.
+func NewVoyageAIEmbedder(opts ...VoyageAIEmbedderOption) (vectorizer *VoyageAIEmbedder, err error) {
+	// Load environment variables from local .env (ignoring errors on purpose)
+	_ = godotenv.Load(filepath.Join(".env"))
+
+	// Initialize with options from the environment
 	vectorizer = &VoyageAIEmbedder{
-		apiKey:   apiKey,
-		endpoint: "https://api.voyageai.com/v1/embeddings",
-		model:    "voyage-3.5-lite",
+		apiKey:   os.Getenv("VOYAGEAI_API_KEY"),
+		endpoint: os.Getenv("VOYAGEAI_EMBEDDING_ENDPOINT"),
+		model:    os.Getenv("VOYAGEAI_EMBEDDING_MODEL"),
 		client:   &http.Client{},
 	}
 
-	// Set options
+	// Set user-provided options, overridding any environment variables
 	for _, fn := range opts {
 		fn(vectorizer)
+	}
+
+	// Ensure all required configs are set before returning the vectorizer
+	if vectorizer.apiKey == "" {
+		return nil, errors.Join(
+			errors.ErrMissingConfig,
+			errors.New("field 'apiKey' is required; use option 'VoyageAIEmbedderWithAPIKey()' or set the environment variable 'VOYAGEAI_API_KEY'."),
+		)
+	}
+	if vectorizer.model == "" {
+		return nil, errors.Join(
+			errors.ErrMissingConfig,
+			errors.New("field 'model' is required; use option 'VoyageAIEmbedderWithModel()' or set the environment variable 'VOYAGEAI_EMBEDDING_ENDPOINT'."),
+		)
+	}
+	if vectorizer.endpoint == "" {
+		return nil, errors.Join(
+			errors.ErrMissingConfig,
+			errors.New("field 'endpoint' is required; use option 'VoyageAIEmbedderWithEndpoint()' or set the environment variable 'VOYAGEAI_EMBEDDING_MODEL'."),
+		)
 	}
 
 	return vectorizer, nil
@@ -63,6 +91,14 @@ func (v *VoyageAIEmbedder) TotalTokensUsed() int {
 
 // VoyageAIEmbedderOption functions modify a [VoyageAIEmbedder].
 type VoyageAIEmbedderOption func(c *VoyageAIEmbedder)
+
+// VoyageAIEmbedderWithAPIKey sets the API key string to use with the
+// [VoyageAIEmbedder].
+func VoyageAIEmbedderWithAPIKey(apiKey string) VoyageAIEmbedderOption {
+	return func(c *VoyageAIEmbedder) {
+		c.apiKey = apiKey
+	}
+}
 
 // VoyageAIEmbedderWithModel sets the model to use with the [VoyageAIEmbedder].
 func VoyageAIEmbedderWithModel(model string) VoyageAIEmbedderOption {

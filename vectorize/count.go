@@ -110,7 +110,7 @@ func (c *CountVectorizer) Method() VectorizationMethod {
 func (v *CountVectorizer) Vectorize(chunk string) (vector vector.Vector, err error) {
 	// We need to have set a vocabulary if we wish to use this function
 	if v.vocab == nil {
-		return nil, errors.ErrVocabularyNotSet
+		return nil, errors.Join(errors.ErrMissingConfig, errors.New("a vocab is required to be set"))
 	}
 
 	// Call the method function
