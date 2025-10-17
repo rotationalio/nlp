@@ -24,7 +24,7 @@ func TestVoyageAIEmbedder(t *testing.T) {
 	}
 
 	// Load the test env variables, ignoring errors
-	_ = godotenv.Load(filepath.Join(".env"))
+	_ = godotenv.Load(filepath.Join("..", ".env"))
 
 	// Skip the test if any of the required configs are unset in the environment
 	apiKey, ok := os.LookupEnv("VOYAGEAI_API_KEY")

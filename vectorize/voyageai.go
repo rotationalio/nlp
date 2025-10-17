@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path/filepath"
 
-	"github.com/joho/godotenv"
 	"go.rtnl.ai/nlp/errors"
 	"go.rtnl.ai/nlp/vector"
 )
@@ -35,16 +33,14 @@ var _ Vectorizer = &VoyageAIEmbedder{}
 // ############################################################################
 
 // Create a new VoyageAI embedding vectorizer. Options will be loaded from
-// "VOYAGEAI_*" environment variables (loaded from `nlp/vectorize/.env`). The
+// "VOYAGEAI_*" environment variables if available (see `.env.template`). The
 // environment values will be overridden by [VoyageAIEmbedderOption]s.If a
 // necessary option is not provided or found in the environment, then
 // [errors.ErrMissingConfig] will be returned alongside another more descriptive
 // error, so ensure you use [errors.Is] to disambiguate the errors.
 func NewVoyageAIEmbedder(opts ...VoyageAIEmbedderOption) (vectorizer *VoyageAIEmbedder, err error) {
-	// Load environment variables from local .env (ignoring errors on purpose)
-	_ = godotenv.Load(filepath.Join(".env"))
-
-	// Initialize with options from the environment
+	// Initialize with options from the environment; the user must load the env
+	// vars somewhere else themselves.
 	vectorizer = &VoyageAIEmbedder{
 		apiKey:   os.Getenv("VOYAGEAI_API_KEY"),
 		endpoint: os.Getenv("VOYAGEAI_EMBEDDING_ENDPOINT"),
