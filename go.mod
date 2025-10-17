@@ -3,6 +3,7 @@ module go.rtnl.ai/nlp
 go 1.25.1
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.11.1
 	go.rtnl.ai/x v1.9.0
 )
