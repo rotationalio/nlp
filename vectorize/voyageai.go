@@ -15,8 +15,43 @@ import (
 // VoyageEmbedder
 // ############################################################################
 
-// VoyageAIEmbedder can be used to vectorize text using the VoyageAI embeddings
-// API (https://docs.voyageai.com/reference/embeddings-api).
+/*
+VoyageAIEmbedder can be used to vectorize text using the VoyageAI embeddings
+API (https://docs.voyageai.com/reference/embeddings-api).
+
+Usage Example:
+
+	// Panics when the error is not nil
+	func checkErr(err error) {
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// We can also use the VoyageAI API to get embedding vectors; see the docs for
+	// [NewVoyageAIEmbedder] for information on how to load it's configs
+	// via environment variables or you can load them using the options functions
+	// as shown below
+	voyage, err := vectorize.NewVoyageAIEmbedder(
+		vectorize.VoyageAIEmbedderWithAPIKey("your_voyageai_api_key_here"),
+		vectorize.VoyageAIEmbedderWithEndpoint("https://api.voyageai.com/v1/embeddings"),
+		vectorize.VoyageAIEmbedderWithModel("voyage-3.5-lite"),
+		)
+	checkErr(err)
+
+	// Get a single embedding vector using the [Vectorizer.Vectorize] interface
+	chunk1 := "A simple test."
+	embedding, err := voyage.Vectorize(chunk1)
+	checkErr(err)
+
+	// Get several embeddings in a single VoyageAI API call
+	chunks := []string{chunk1, "A slightly more complex test, but only slightly.", "Number three!"}
+	embeddings, err := voyage.VectorizeAll(chunks)
+	checkErr(err)
+
+	// Print the number of VoyageAI usage tokens that were used
+	fmt.Printf("used %d tokens\n", voyage.TotalTokensUsed())
+*/
 type VoyageAIEmbedder struct {
 	apiKey          string
 	endpoint        string

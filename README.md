@@ -36,18 +36,31 @@ This also includes using the `token.Token` and `tokenlist.TokenList` types which
 2) Use the various tools in the lower level packages such as the `stem` or the `tokenize` packages on an as-needed basis.
 These tools generally use basic Go types such as strings, ints, floats, and slices of the same.
 
-### text.Text API Example
+### Usage Example
+
+The example below shows most/all of the features of the NLP library when using the `text.Text` interface.
+This is the simplest and easiest way to use the NLP library.
 
 ```Go
+// Panics when the error is not nil
+func checkErr(err error) {
+  if err != nil {
+    panic(err)
+  }
+}
+
 // Create a [Text] with the default settings
 myText, err := text.New("apple aardvarks zebra bananna aardvark")
+checkErr(err)
 
 // Get all of the word tokens
 myTokens, err := myText.Tokens() // TokenList
+checkErr(err)
 
 // Get all word stem tokens which use the same underlying types as the full
 // word tokens above (ignoring errors in this example)
 myStems, err := myText.Stems() // TokenList
+checkErr(err)
 
 // The stems are 1:1 count with the tokens
 if len(myTokens) != len(myStems) { // 5 == 5
@@ -57,6 +70,7 @@ if len(myTokens) != len(myStems) { // 5 == 5
 // You can also get a type count, which returns the count of each unique
 // word stem (ignoring errors) ("aardvark" has a 2 count for this example)
 myCount, err := myText.TypeCount() // map[string]int
+checkErr(err)
 
 // These are a [tokenlist.TokenList], but if you need a slice of strings...
 stringTokens := myTokens.Strings() // []string
@@ -81,17 +95,22 @@ myText, err = text.New(
   "cars have engines like motorcycles have engines",
   text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
 )
+checkErr(err)
 otherText, err := text.New(
   "engines are attached to transmissions",
   text.WithVocabulary([]string{"car", "engine", "brakes", "transmission"}),
 )
+checkErr(err)
 
 // Cosine similarity with another string
 similarity, err := myText.CosineSimilarity(otherText) // ~0.5
+checkErr(err)
 
 // We can also get a one-hot or frequency vectorization of our text
 myOneHotVector, err := myText.VectorizeOneHot() // vector.Vector{1, 1, 0, 0}
+checkErr(err)
 myFrequencyVector, err := myText.VectorizeFrequency() // vector.Vector{1, 2, 0, 0}
+checkErr(err)
 
 // Get readability scores (a score of 0.0 indicates that the word and/or
 // sentence count is zero)
@@ -102,6 +121,32 @@ grade := myText.FleschKincaidGradeLevel() // 15.797
 count := myText.WordsCount() // 7
 count = myText.SentencesCount() // 1
 count = myText.SyllablesCount() // 17
+
+// We can also use the VoyageAI API to get embedding vectors; see the docs for
+// [vectorize.NewVoyageAIEmbedder] for information on how to load it's configs
+// via environment variables or you can load them using the options functions
+// as shown below
+// NOTE: currently the VoyageAI embedding functionality is stand-alone and not
+// yet available with the [text.Text] interface.
+voyage, err := vectorize.NewVoyageAIEmbedder(
+  vectorize.VoyageAIEmbedderWithAPIKey("your_voyageai_api_key_here"),
+  vectorize.VoyageAIEmbedderWithEndpoint("https://api.voyageai.com/v1/embeddings"),
+  vectorize.VoyageAIEmbedderWithModel("voyage-3.5-lite"),
+)
+checkErr(err)
+
+// Get a single embedding vector
+chunk1 := "A simple test."
+embedding, err := voyage.Vectorize(chunk1)
+checkErr(err)
+
+// Run a test with a few embeddings
+chunks := []string{chunk1, "A slightly more complex test, but only slightly.", "Number three!"}
+embeddings, err := voyage.VectorizeAll(chunks)
+checkErr(err)
+
+// How many tokens were used for the tests?
+fmt.Printf("used %d tokens\n", voyage.TotalTokensUsed())
 ```
 
 See the [NLP Go docs](https://go.rtnl.ai/nlp) for this library for more details.
